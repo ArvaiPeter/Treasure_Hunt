@@ -140,14 +140,17 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ConsoleView.cpp" />
+    <ClCompile Include="GameObjectFactory.cpp" />
+    <ClCompile Include="GameObjects.cpp" />
     <ClCompile Include="TreasureHunt.cpp" />
     <ClCompile Include="TreasureHuntGameController.cpp" />
     <ClCompile Include="TreasureHuntGameModel.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ConsoleView.h" />
-    <ClInclude Include="IGameController.h" />
-    <ClInclude Include="IGameModel.h" />
+    <ClInclude Include="GameObjectFactory.h" />
+    <ClInclude Include="GameObjectRepresentations.h" />
+    <ClInclude Include="GameObjects.h" />
     <ClInclude Include="IView.h" />
     <ClInclude Include="TreasureHuntGameController.h" />
     <ClInclude Include="TreasureHuntGameModel.h" />

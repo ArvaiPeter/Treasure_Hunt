@@ -9,7 +9,6 @@ public:
 		: m_ScreenWidth(screenWidth), m_ScreenHeight(screenHeight) {}
 
 	virtual ~IView() = default;
-
 	virtual void DrawFrame() = 0;
 
 protected:

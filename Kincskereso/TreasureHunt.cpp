@@ -2,7 +2,6 @@
 
 #include "ConsoleView.h"
 
-
 int main() {
 
 	HANDLE consoleHandle = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
