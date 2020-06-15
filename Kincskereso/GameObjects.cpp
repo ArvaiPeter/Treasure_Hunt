@@ -3,6 +3,14 @@
 #include "GameObjectRepresentations.h"
 
 
+// ============================ Game Object ==================================
+GameObject::GameObject(const unsigned int& x, const unsigned int& y, const wchar_t  repr)
+	: m_X(x), m_Y(y), m_Representation(repr) {}
+
+wchar_t GameObject::GetRepresentation() const {
+	return m_Representation;
+}
+
 // ============================ Game Object Modifiers ==================================
 IDamageable::IDamageable(const uint8_t& health, const uint8_t& maxHealth, const bool& alive /*= true*/)
 	: m_Health(health), m_MaxHealth(maxHealth), m_Alive(alive) {}
@@ -32,12 +40,8 @@ uint8_t IDamageable::GetMaxHealth() const {
 	return m_MaxHealth;
 }
 
-// ============================ Game Object ==================================
-GameObject::GameObject(const uint16_t& x, const uint16_t& y, const wchar_t& repr)
-	: m_X(x), m_Y(y), m_Representation(repr) {}
-
 // ============================ Environment ==================================
-Environment::Environment(const uint16_t& x, const uint16_t& y, EnvironmentType type)
+Environment::Environment(const unsigned int& x, const unsigned int& y, EnvironmentType type)
 	: GameObject(x,y, EnvRepr[type]),
 	m_Type(type),
 	m_Walkable((type != EnvironmentType::WALL) ? true : false) { }
@@ -57,7 +61,7 @@ void Environment::Interact(GameObject* with) {
 }
 
 // ============================ Consumable ==================================
-Consumable::Consumable(const uint16_t& x, const uint16_t& y, ConsumableType type)
+Consumable::Consumable(const unsigned int& x, const unsigned int& y, ConsumableType type)
 	: GameObject(x, y, ConsumableRepr[type]), m_Type(type), m_Consumed(false) {}
 
 void Consumable::Interact(GameObject* with) {
@@ -92,7 +96,7 @@ bool Consumable::IsConsumed() {
 }
 
 // ============================ Beast ==================================
-Beast::Beast(const uint16_t& x, const uint16_t& y)
+Beast::Beast(const unsigned int& x, const unsigned int& y)
 	: GameObject(x, y, GameObjectRepr::BEAST), IDamageable(1, 1) {}
 
 void Beast::Heal(const uint8_t& amount) {
@@ -122,10 +126,10 @@ void Beast::Interact(GameObject* with) {
 }
 
 // ============================ Player ==================================
-Player::Player(const uint16_t& x, const uint16_t& y)
+Player::Player(const unsigned int& x, const unsigned int& y)
 	: GameObject(x, y, GameObjectRepr::PLAYER), IDamageable(2, 2), m_Armed(false) {}
 
-void Player::Move(const uint16_t& dX, const uint16_t& dY) {
+void Player::Move(const unsigned int& dX, const unsigned int& dY) {
 	m_X += dX;
 	m_Y += dY;
 }

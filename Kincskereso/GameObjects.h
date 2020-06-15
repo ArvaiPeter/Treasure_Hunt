@@ -8,12 +8,14 @@
 class GameObject
 {
 public:
-	GameObject(const uint16_t& x, const uint16_t& y, const wchar_t& repr);
+	GameObject(const unsigned int& x, const unsigned int& y, const wchar_t repr);
 	virtual ~GameObject() = default;
 
+	wchar_t GetRepresentation() const;
+
 protected:
-	uint16_t m_X;
-	uint16_t m_Y;
+	unsigned int m_X;
+	unsigned int m_Y;
 	wchar_t m_Representation;
 };
 
@@ -21,7 +23,7 @@ protected:
 // ============================ Game Object Modifiers ==================================
 class IMoveable {
 protected:
-	virtual void Move(const uint16_t& dX, const uint16_t& dY) = 0;
+	virtual void Move(const unsigned int& dX, const unsigned int& dY) = 0;
 };
 
 class IInteractable {
@@ -63,7 +65,7 @@ static std::map<EnvironmentType, wchar_t> EnvRepr = {
 
 class Environment : public GameObject, public IInteractable{
 public:
-	Environment(const uint16_t& x, const uint16_t& y, EnvironmentType type);
+	Environment(const unsigned int& x, const unsigned int& y, EnvironmentType type);
 
 	void Interact(GameObject* with) override;
 private:
@@ -86,7 +88,7 @@ static std::map<ConsumableType, wchar_t> ConsumableRepr = {
 
 class Consumable : public GameObject, IInteractable {
 public:
-	Consumable(const uint16_t& x, const uint16_t& y, ConsumableType type);
+	Consumable(const unsigned int& x, const unsigned int& y, ConsumableType type);
 
 	void Interact(GameObject* with) override;
 	bool IsConsumed();
@@ -99,7 +101,7 @@ protected:
 // ============================ Beast ==================================
 class Beast : public GameObject, public IDamageable, IInteractable {
 public:
-	Beast(const uint16_t& x, const uint16_t& y);
+	Beast(const unsigned int& x, const unsigned int& y);
 
 	void Heal(const uint8_t& amount) override;
 	void Interact(GameObject* with) override;
@@ -108,9 +110,9 @@ public:
 // ============================ Player ==================================
 class Player : public GameObject, IMoveable, public IDamageable {
 public:
-	Player(const uint16_t& x, const uint16_t& y);
+	Player(const unsigned int& x, const unsigned int& y);
 
-	void Move(const uint16_t& newX, const uint16_t& newY) override;
+	void Move(const unsigned int& newX, const unsigned int& newY) override;
 
 	bool IsArmed() const;
 	bool& IsArmed();
