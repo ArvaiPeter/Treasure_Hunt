@@ -8,9 +8,10 @@ class ConsoleView
 {
 public:
 	ConsoleView(const unsigned int& screenWidth, const unsigned int& screenHeight);
+	~ConsoleView();
 
 	void DrawFrame();
-	void SetScreenBuffer(wchar_t* newScreenBuff);
+	wchar_t* GetScreenBuffer();
 
 	//TODO: may not be necessary
 	unsigned int ConvertIndexingFrom2D(const unsigned int& x, const unsigned int& y);

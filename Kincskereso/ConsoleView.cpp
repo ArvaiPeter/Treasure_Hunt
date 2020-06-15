@@ -7,10 +7,6 @@ ConsoleView::ConsoleView(const unsigned int& screenWidth, const unsigned int& sc
 	m_ConsoleHandle(CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL)),
 	m_BytesWritten()
 {
-	for (size_t i = 0; i < m_ScreenWidth * m_ScreenHeight; ++i) {
-		m_Screen[i] = L' ';
-	}
-
 	// resizing window
 	_COORD coord;
 	coord.X = m_ScreenWidth;
@@ -28,12 +24,18 @@ ConsoleView::ConsoleView(const unsigned int& screenWidth, const unsigned int& sc
 	SetConsoleActiveScreenBuffer(m_ConsoleHandle);
 }
 
-void ConsoleView::DrawFrame() {
-	WriteConsoleOutputCharacter(m_ConsoleHandle, m_Screen, m_ScreenWidth*m_ScreenHeight, { 0,0 }, &m_BytesWritten);
+ConsoleView::~ConsoleView() {
+	delete m_Screen;
 }
 
-void ConsoleView::SetScreenBuffer(wchar_t* newScreenBuff) {
-	m_Screen = newScreenBuff;
+void ConsoleView::DrawFrame() {
+	if (m_Screen) {
+		WriteConsoleOutputCharacter(m_ConsoleHandle, m_Screen, m_ScreenWidth * m_ScreenHeight, { 0,0 }, &m_BytesWritten);
+	}
+}
+
+wchar_t* ConsoleView::GetScreenBuffer() {
+	return m_Screen;
 }
 
 unsigned int ConsoleView::ConvertIndexingFrom2D(const unsigned int& x, const unsigned int& y) {
