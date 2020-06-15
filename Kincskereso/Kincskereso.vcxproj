@@ -151,7 +151,6 @@
     <ClInclude Include="GameObjectFactory.h" />
     <ClInclude Include="GameObjectRepresentations.h" />
     <ClInclude Include="GameObjects.h" />
-    <ClInclude Include="IView.h" />
     <ClInclude Include="TreasureHuntGameController.h" />
     <ClInclude Include="TreasureHuntGameModel.h" />
   </ItemGroup>
