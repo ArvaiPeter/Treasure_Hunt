@@ -55,11 +55,11 @@ void TreasureHuntGameController::DrawFrame() {
 
 	std::vector<DrawRect> screenElements;
 
+	// PLAYING FIELD
 	std::wstring pField;
 	for (const auto& gameObject : lvl) {
 		pField += gameObject->GetRepresentation();
 	}
-
 
 	if (player) {
 		auto playerIndex = player->Y() * levelDimensions.first + player->X();
@@ -67,6 +67,15 @@ void TreasureHuntGameController::DrawFrame() {
 	}
 
 	screenElements.emplace_back(0, 0, levelDimensions.first, levelDimensions.second, pField);
+
+	// PLAYER STATS
+	std::wstring health = L"HEALTH: ";
+	health += std::to_wstring(player->GetHealth());
+	screenElements.emplace_back(levelDimensions.first + 3, 0, health.length() , 1, health);
+	
+	std::wstring weapon = L"WEAPON: ";
+	weapon += player->IsArmed() ? L"SWORD" : L"NONE";
+	screenElements.emplace_back(levelDimensions.first + 3, 1, weapon.length(), 1, weapon);
 
 	m_View.DrawFrame(screenElements);
 }

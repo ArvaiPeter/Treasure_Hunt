@@ -85,9 +85,11 @@ wchar_t Consumable::GetRepresentation() const {
 }
 
 void Consumable::Interact(GameObject* with) {
-	Player* player = dynamic_cast<Player*>(with);
+	if (m_Consumed) {
+		return;
+	}
 
-	if (player) {
+	if (auto player = dynamic_cast<Player*>(with)) {
 		m_Consumed = true;
 		if (m_Type == ConsumableType::POTION) {
 			if (player->GetHealth() < player->GetMaxHealth()) {
