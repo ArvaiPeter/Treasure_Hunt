@@ -13,13 +13,15 @@ public:
 
 	void LoadLevel(const std::wstring& lvlName);
 
-	const std::vector<GameObject>& GetLevel() const;
+	const std::vector< std::unique_ptr<GameObject> >& GetLevel() const;
+	Player* GetPlayer();
 
 	std::pair<unsigned int /*width*/, unsigned int /*heigth*/> GetLevelDimensions() const;
 
 private:
 	std::wstring m_LevelName;
-	std::vector<GameObject> m_Level;
+	std::vector< std::unique_ptr<GameObject> > m_Level;
+	std::unique_ptr<GameObject> m_Player;
 
 	// TODO: experimantal path or custom path handling
 	const std::wstring m_AssetFolderPath = L"..\\Assets";

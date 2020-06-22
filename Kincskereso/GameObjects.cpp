@@ -11,6 +11,14 @@ wchar_t GameObject::GetRepresentation() const {
 	return m_Representation;
 }
 
+unsigned int GameObject::X() const {
+	return m_X;
+}
+
+unsigned int GameObject::Y() const {
+	return m_Y;
+}
+
 // ============================ Game Object Modifiers ==================================
 IDamageable::IDamageable(const uint8_t& health, const uint8_t& maxHealth, const bool& alive /*= true*/)
 	: m_Health(health), m_MaxHealth(maxHealth), m_Alive(alive) {}
@@ -127,7 +135,7 @@ void Beast::Interact(GameObject* with) {
 
 // ============================ Player ==================================
 Player::Player(const unsigned int& x, const unsigned int& y)
-	: GameObject(x, y, GameObjectRepr::PLAYER), IDamageable(2, 2), m_Armed(false) {}
+	: GameObject(x, y, GameObjectRepr::PLAYER), IMoveable(), IDamageable(2, 2), m_Armed(false) {}
 
 void Player::Move(const unsigned int& dX, const unsigned int& dY) {
 	m_X += dX;

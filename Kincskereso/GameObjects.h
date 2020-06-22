@@ -13,6 +13,9 @@ public:
 
 	wchar_t GetRepresentation() const;
 
+	unsigned int X() const;
+	unsigned int Y() const;
+
 protected:
 	unsigned int m_X;
 	unsigned int m_Y;
@@ -22,12 +25,14 @@ protected:
 
 // ============================ Game Object Modifiers ==================================
 class IMoveable {
-protected:
+public:
+	virtual ~IMoveable() = default;
 	virtual void Move(const unsigned int& dX, const unsigned int& dY) = 0;
 };
 
 class IInteractable {
 protected:
+	virtual ~IInteractable() = default;
 	virtual void Interact(GameObject* with) = 0;
 };
 
@@ -108,11 +113,11 @@ public:
 };
 
 // ============================ Player ==================================
-class Player : public GameObject, IMoveable, public IDamageable {
+class Player : public GameObject, public IMoveable, public IDamageable {
 public:
 	Player(const unsigned int& x, const unsigned int& y);
 
-	void Move(const unsigned int& newX, const unsigned int& newY) override;
+	void Move(const unsigned int& dX, const unsigned int& dY) override;
 
 	bool IsArmed() const;
 	bool& IsArmed();

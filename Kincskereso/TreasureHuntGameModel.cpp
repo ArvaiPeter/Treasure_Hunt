@@ -1,8 +1,12 @@
 #include "TreasureHuntGameModel.h"
 
+#include <memory>
 
-TreasureHuntGameModel::TreasureHuntGameModel() 
-	: m_GameObjectFactory(GameObjectFactory::GetInstance()) {}
+TreasureHuntGameModel::TreasureHuntGameModel()
+	: m_GameObjectFactory(GameObjectFactory::GetInstance()),
+	m_lvlWidth(0),
+	m_lvlHeight(0)
+{}
 
 void TreasureHuntGameModel::LoadLevel(const std::wstring& lvlName) {
 	// TODO: error handling
@@ -23,9 +27,17 @@ void TreasureHuntGameModel::LoadLevel(const std::wstring& lvlName) {
 		}
 
 		unsigned int x = 0;
+
 		for (const auto& lvlElement : line) {
-			auto element = m_GameObjectFactory.CreateGameObject(x, y, lvlElement);
-			m_Level.push_back(element);
+			
+			if (lvlElement == GameObjectRepr::PLAYER) {
+				m_Player = m_GameObjectFactory.CreateGameObject(x, y, lvlElement);
+				m_Level.push_back(m_GameObjectFactory.CreateGameObject(x, y, ' '));
+			}
+			else {
+				m_Level.push_back(m_GameObjectFactory.CreateGameObject(x, y, lvlElement));
+			}		
+			
 			++x;
 		}
 
@@ -34,8 +46,14 @@ void TreasureHuntGameModel::LoadLevel(const std::wstring& lvlName) {
 	m_lvlHeight = y;
 }
 
-const std::vector<GameObject>& TreasureHuntGameModel::GetLevel() const {
+const std::vector< std::unique_ptr<GameObject> >& TreasureHuntGameModel::GetLevel() const {
 	return m_Level;
+}
+
+Player* TreasureHuntGameModel::GetPlayer() {
+	// TODO: check if dynamic cast is not nullptr
+	auto ret = dynamic_cast<Player*>(m_Player.get());
+	return ret;
 }
 
 std::pair<unsigned int, unsigned int> TreasureHuntGameModel::GetLevelDimensions() const {

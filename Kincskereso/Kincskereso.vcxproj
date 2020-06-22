@@ -148,6 +148,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ConsoleView.h" />
+    <ClInclude Include="DrawRect.h" />
     <ClInclude Include="GameObjectFactory.h" />
     <ClInclude Include="GameObjectRepresentations.h" />
     <ClInclude Include="GameObjects.h" />
