@@ -2,6 +2,7 @@
 
 #include "ConsoleView.h"
 #include "TreasureHuntGameModel.h"
+#include "InputController.h"
 
 class TreasureHuntGameController
 {
@@ -11,8 +12,12 @@ public:
 	void Run();
 
 private:
+	void DrawFrame();
+
+private:
 	ConsoleView m_View;
 	TreasureHuntGameModel m_Model;
+	InputController m_InputController;
 
 	bool m_GameHasEnded;
 

@@ -142,6 +142,7 @@
     <ClCompile Include="ConsoleView.cpp" />
     <ClCompile Include="GameObjectFactory.cpp" />
     <ClCompile Include="GameObjects.cpp" />
+    <ClCompile Include="InputController.cpp" />
     <ClCompile Include="TreasureHunt.cpp" />
     <ClCompile Include="TreasureHuntGameController.cpp" />
     <ClCompile Include="TreasureHuntGameModel.cpp" />
@@ -152,6 +153,7 @@
     <ClInclude Include="GameObjectFactory.h" />
     <ClInclude Include="GameObjectRepresentations.h" />
     <ClInclude Include="GameObjects.h" />
+    <ClInclude Include="InputController.h" />
     <ClInclude Include="TreasureHuntGameController.h" />
     <ClInclude Include="TreasureHuntGameModel.h" />
   </ItemGroup>

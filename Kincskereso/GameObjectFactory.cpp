@@ -6,27 +6,27 @@ const GameObjectFactory& GameObjectFactory::GetInstance() {
 	return instance;
 }
 
-std::unique_ptr<GameObject> GameObjectFactory::CreateGameObject(const unsigned int& x, const unsigned int& y, const char& repr) const{
+GameObject* GameObjectFactory::CreateGameObject(const unsigned int& x, const unsigned int& y, const char& repr) const{
 	switch (repr)
 	{
 	case 'k':
-		return std::make_unique<Consumable>(x, y, ConsumableType::TREASURE);
+		return new Consumable(x, y, ConsumableType::TREASURE);
 	case 'i':
-		return std::make_unique<Consumable>(x, y, ConsumableType::POTION);
+		return new Consumable(x, y, ConsumableType::POTION);
 	case 'c':
-		return std::make_unique<Environment>(x, y, EnvironmentType::TRAP);
+		return new Environment(x, y, EnvironmentType::TRAP);
 	case 'a':
-		return std::make_unique<Consumable>(x, y, ConsumableType::SWORD);
+		return new Consumable(x, y, ConsumableType::SWORD);
 	case 'h':
-		return std::make_unique<Player>(x, y);
+		return new Player(x, y);
 	case 'x':
-		return std::make_unique<Environment>(x, y, EnvironmentType::WALL);
+		return new Environment(x, y, EnvironmentType::WALL);
 	case 'j':
-		return std::make_unique<Environment>(x, y, EnvironmentType::EXIT);
+		return new Environment(x, y, EnvironmentType::EXIT);
 	case 's':
-		return std::make_unique<Beast>(x, y);
+		return new Beast(x, y);
 	case ' ':
-		return std::make_unique<Environment>(x, y, EnvironmentType::PATH);
+		return new Environment(x, y, EnvironmentType::PATH);
 	default:
 		// TODO: error unrecognised game object
 		break;

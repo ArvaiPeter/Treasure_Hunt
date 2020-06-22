@@ -11,7 +11,7 @@ class GameObjectFactory
 public:
 	static const GameObjectFactory& GetInstance();
 
-	std::unique_ptr<GameObject> CreateGameObject(const unsigned int& x, const unsigned int& y, const char& repr) const;
+	GameObject* CreateGameObject(const unsigned int& x, const unsigned int& y, const char& repr) const;
 
 	GameObjectFactory(const GameObjectFactory& ohter) = delete;
 	GameObjectFactory& operator=(const GameObjectFactory& other) = delete;

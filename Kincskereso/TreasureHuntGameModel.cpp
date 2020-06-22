@@ -31,28 +31,26 @@ void TreasureHuntGameModel::LoadLevel(const std::wstring& lvlName) {
 		for (const auto& lvlElement : line) {
 			
 			if (lvlElement == GameObjectRepr::PLAYER) {
-				m_Player = m_GameObjectFactory.CreateGameObject(x, y, lvlElement);
-				m_Level.push_back(m_GameObjectFactory.CreateGameObject(x, y, ' '));
+				m_Player.reset(m_GameObjectFactory.CreateGameObject(x, y, lvlElement));
+				m_Level.emplace_back(m_GameObjectFactory.CreateGameObject(x, y, ' '));
 			}
 			else {
-				m_Level.push_back(m_GameObjectFactory.CreateGameObject(x, y, lvlElement));
+				m_Level.emplace_back(m_GameObjectFactory.CreateGameObject(x, y, lvlElement));
 			}		
-			
 			++x;
 		}
-
 		++y;
 	}
 	m_lvlHeight = y;
 }
 
-const std::vector< std::unique_ptr<GameObject> >& TreasureHuntGameModel::GetLevel() const {
+const std::vector< std::shared_ptr<GameObject> >& TreasureHuntGameModel::GetLevel() const {
 	return m_Level;
 }
 
-Player* TreasureHuntGameModel::GetPlayer() {
+std::shared_ptr<Player> TreasureHuntGameModel::GetPlayer() {
 	// TODO: check if dynamic cast is not nullptr
-	auto ret = dynamic_cast<Player*>(m_Player.get());
+	auto ret = std::dynamic_pointer_cast<Player>(m_Player);
 	return ret;
 }
 
