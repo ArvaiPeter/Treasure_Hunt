@@ -25,11 +25,11 @@ IDamageable::IDamageable(const uint8_t& health, const uint8_t& maxHealth, const 
 
 void IDamageable::TakeDamage(const uint8_t& dmg) {
 	m_Health -= dmg;
-	m_Alive = m_Health <= 0;
+	m_Alive = m_Health > 0;
 }
 
 void IDamageable::Heal(const uint8_t& amount) {
-	if (m_Alive)
+	if (!m_Alive)
 	{
 		return; // maybe throw exception
 	}
@@ -38,6 +38,10 @@ void IDamageable::Heal(const uint8_t& amount) {
 	if (m_Health > m_MaxHealth) {
 		m_Health = m_MaxHealth;
 	}
+}
+
+bool IDamageable::IsAlive() const {
+	return m_Alive;
 }
 
 uint8_t IDamageable::GetHealth() const{
@@ -68,29 +72,36 @@ void Environment::Interact(GameObject* with) {
 	}
 }
 
+EnvironmentType Environment::GetEnvType() const {
+	return m_Type;
+}
+
 // ============================ Consumable ==================================
 Consumable::Consumable(const unsigned int& x, const unsigned int& y, ConsumableType type)
 	: GameObject(x, y, ConsumableRepr[type]), m_Type(type), m_Consumed(false) {}
+
+wchar_t Consumable::GetRepresentation() const {
+	return m_Consumed ? GameObjectRepr::PATH : m_Representation	;
+}
 
 void Consumable::Interact(GameObject* with) {
 	Player* player = dynamic_cast<Player*>(with);
 
 	if (player) {
+		m_Consumed = true;
 		if (m_Type == ConsumableType::POTION) {
 			if (player->GetHealth() < player->GetMaxHealth()) {
 				player->Heal(1);
-				m_Consumed = true;
 			}
 		}
 		else if (m_Type == ConsumableType::SWORD) {
 			player->IsArmed() = true;
-			m_Consumed = true;
 		}
 		else if(m_Type == ConsumableType::TREASURE) { // Treasure
 			player->HasTreasure() = true;
-			m_Consumed = true;
 		}
 		else {
+			m_Consumed = false; //?
 			// TODO error -> new unhandled enum value
 		}
 	}
@@ -103,9 +114,17 @@ bool Consumable::IsConsumed() {
 	return m_Consumed;
 }
 
+ConsumableType Consumable::GetType() const {
+	return m_Type;
+}
+
 // ============================ Beast ==================================
 Beast::Beast(const unsigned int& x, const unsigned int& y)
 	: GameObject(x, y, GameObjectRepr::BEAST), IDamageable(1, 1) {}
+
+wchar_t Beast::GetRepresentation() const {
+	return m_Alive ? m_Representation : GameObjectRepr::PATH;
+}
 
 void Beast::Heal(const uint8_t& amount) {
 	// healing of Beasts is not possible
@@ -114,7 +133,7 @@ void Beast::Heal(const uint8_t& amount) {
 }
 
 void Beast::Interact(GameObject* with) {
-	if (!m_Alive) {
+	if (m_Alive) {
 		Player* player = dynamic_cast<Player*>(with);
 
 		if (player) {

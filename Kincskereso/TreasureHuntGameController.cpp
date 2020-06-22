@@ -32,20 +32,16 @@ void TreasureHuntGameController::Run() {
 		auto& lvl = m_Model.GetLevel();
 		auto player = m_Model.GetPlayer();
 
-		const char changedInput = m_InputController.ButtonsPressed();
+		const char buttonsPressed = m_InputController.ButtonsPressed();
+		unsigned int dx = 0;
+		unsigned int dy = 0;
 
-		if (changedInput & UP) {
-			player->Move(0, -1);
-		}
-		else if (changedInput & LEFT) {
-			player->Move(-1, 0);
-		}
-		else if (changedInput & DOWN) {
-			player->Move(0, 1);
-		}
-		else if (changedInput & RIGHT) {
-			player->Move(1, 0);
-		}
+		if (buttonsPressed & UP)				--dy;
+		else if (buttonsPressed & LEFT)			--dx;
+		else if (buttonsPressed & DOWN)			++dy;
+		else if (buttonsPressed & RIGHT)		++dx;
+
+		MovePlayer(dx, dy);
 
 		// DISPLAY =================================
 		DrawFrame();
@@ -73,4 +69,46 @@ void TreasureHuntGameController::DrawFrame() {
 	screenElements.emplace_back(0, 0, levelDimensions.first, levelDimensions.second, pField);
 
 	m_View.DrawFrame(screenElements);
+}
+
+void TreasureHuntGameController::MovePlayer(
+	const unsigned int& dX,
+	const unsigned int& dY
+) {
+	auto player = m_Model.GetPlayer();
+	auto lvl = m_Model.GetLevel();
+	auto lvlIndex = (player->Y() + dY) * m_Model.GetLevelDimensions().first + (player->X() + dX);
+
+	if (auto env = std::dynamic_pointer_cast<Environment>(lvl[lvlIndex])) {
+		switch (env->GetEnvType()) {
+		case EnvironmentType::WALL:
+			return;
+		case EnvironmentType::TRAP:
+			env->Interact(player.get());
+			player->Move(dX, dY);
+			break;
+		case EnvironmentType::EXIT:
+			player->Move(dX, dY);
+			m_GameHasEnded = true;
+			break;
+		case EnvironmentType::PATH:
+			player->Move(dX, dY);
+			break;
+		}
+	}
+	else if (auto consumable = std::dynamic_pointer_cast<Consumable>(lvl[lvlIndex])) {
+		consumable->Interact(player.get());
+		player->Move(dX, dY);
+	}
+	else if (auto beast = std::dynamic_pointer_cast<Beast>(lvl[lvlIndex])) {
+		if (beast->IsAlive()) {
+			beast->Interact(player.get());
+
+			if (player->GetHealth() == 0) {
+				m_GameHasEnded = true;
+			}
+		}
+		player->Move(dX, dY);
+	}
+
 }

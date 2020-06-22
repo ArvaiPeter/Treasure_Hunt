@@ -13,6 +13,8 @@ public:
 
 private:
 	void DrawFrame();
+	void MovePlayer(const unsigned int& toX,
+					const unsigned int& toY	);
 
 private:
 	ConsoleView m_View;

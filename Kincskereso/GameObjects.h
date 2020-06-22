@@ -11,7 +11,7 @@ public:
 	GameObject(const unsigned int& x, const unsigned int& y, const wchar_t repr);
 	virtual ~GameObject() = default;
 
-	wchar_t GetRepresentation() const;
+	virtual wchar_t GetRepresentation() const;
 
 	unsigned int X() const;
 	unsigned int Y() const;
@@ -41,6 +41,7 @@ public:
 	virtual void TakeDamage(const uint8_t& dmg);
 	virtual void Heal(const uint8_t& amount);
 
+	virtual bool IsAlive() const;
 	virtual uint8_t GetHealth() const;
 	virtual uint8_t GetMaxHealth() const;
 
@@ -72,7 +73,9 @@ class Environment : public GameObject, public IInteractable{
 public:
 	Environment(const unsigned int& x, const unsigned int& y, EnvironmentType type);
 
+	
 	void Interact(GameObject* with) override;
+	EnvironmentType GetEnvType() const;
 private:
 	EnvironmentType m_Type;
 	bool m_Walkable;
@@ -95,8 +98,10 @@ class Consumable : public GameObject, IInteractable {
 public:
 	Consumable(const unsigned int& x, const unsigned int& y, ConsumableType type);
 
+	wchar_t GetRepresentation() const override;
 	void Interact(GameObject* with) override;
 	bool IsConsumed();
+	ConsumableType GetType() const;
 
 protected:
 	bool m_Consumed;
@@ -108,6 +113,7 @@ class Beast : public GameObject, public IDamageable, IInteractable {
 public:
 	Beast(const unsigned int& x, const unsigned int& y);
 
+	wchar_t GetRepresentation() const override;
 	void Heal(const uint8_t& amount) override;
 	void Interact(GameObject* with) override;
 };
