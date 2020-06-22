@@ -12,18 +12,25 @@ TreasureHuntGameController::TreasureHuntGameController()
 	: m_View(ConsoleView(m_ScreenWidth, m_ScreenHeight)),
 	m_Model(TreasureHuntGameModel()),
 	m_InputController(),
-	m_GameHasEnded(false)
+	m_GameHasEnded(false),
+	m_UserHasControll(true)
 {
 	// SETUP =======================================
 	m_Model.LoadLevel(L"level_1.txt");
+	m_Solver = std::make_unique<AstarPathFinder>(m_Model);
 }
 
 void TreasureHuntGameController::Run() {
 
+	std::stack<Node*> pathStack;
+	bool destinationFound = false;
+
 	while (!m_GameHasEnded) {
 		// TIMING  =================================
 		// TODO: rework
-		std::this_thread::sleep_for(std::chrono::microseconds(100));
+		if (!m_UserHasControll) {
+			std::this_thread::sleep_for(std::chrono::milliseconds(700));
+		}		
 
 		// INPUT  =================================
 		m_InputController.GetInput();
@@ -33,15 +40,47 @@ void TreasureHuntGameController::Run() {
 		auto player = m_Model.GetPlayer();
 
 		const char buttonsPressed = m_InputController.ButtonsPressed();
-		unsigned int dx = 0;
-		unsigned int dy = 0;
 
-		if (buttonsPressed & UP)				--dy;
-		else if (buttonsPressed & LEFT)			--dx;
-		else if (buttonsPressed & DOWN)			++dy;
-		else if (buttonsPressed & RIGHT)		++dx;
+		if (buttonsPressed & TOGGLE_SOLVER) {
+			m_UserHasControll = !m_UserHasControll;
+		}
+		
+		if (m_UserHasControll) {
+			int dx = 0;
+			int dy = 0;
 
-		MovePlayer(dx, dy);
+			if (buttonsPressed & UP)				--dy;
+			else if (buttonsPressed & LEFT)			--dx;
+			else if (buttonsPressed & DOWN)			++dy;
+			else if (buttonsPressed & RIGHT)		++dx;
+
+			MovePlayer(dx, dy);
+		}
+		else {
+			// TEST TEST TEST
+			// finding the potion
+			if (!destinationFound) {
+				for (auto obj : lvl) {
+					if (auto consumable = std::dynamic_pointer_cast<Consumable>(obj)) {
+						if (consumable->GetType() == ConsumableType::POTION) {
+							auto found = m_Solver->FindPath(consumable->X(), consumable->Y());
+							destinationFound = true;
+							break;
+						}
+					}
+				}
+			}
+
+			if(pathStack.empty())
+				pathStack = std::move(m_Solver->GetPath());
+
+			auto nextStep = pathStack.top();
+			int dx = nextStep->X() - player->X();
+			int dy = nextStep->Y() - player->Y();
+			MovePlayer(dx, dy);
+			pathStack.pop();
+			
+		}
 
 		// DISPLAY =================================
 		DrawFrame();

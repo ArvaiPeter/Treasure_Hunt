@@ -143,6 +143,7 @@
     <ClCompile Include="GameObjectFactory.cpp" />
     <ClCompile Include="GameObjects.cpp" />
     <ClCompile Include="InputController.cpp" />
+    <ClCompile Include="Solver.cpp" />
     <ClCompile Include="TreasureHunt.cpp" />
     <ClCompile Include="TreasureHuntGameController.cpp" />
     <ClCompile Include="TreasureHuntGameModel.cpp" />
@@ -154,6 +155,7 @@
     <ClInclude Include="GameObjectRepresentations.h" />
     <ClInclude Include="GameObjects.h" />
     <ClInclude Include="InputController.h" />
+    <ClInclude Include="Solver.h" />
     <ClInclude Include="TreasureHuntGameController.h" />
     <ClInclude Include="TreasureHuntGameModel.h" />
   </ItemGroup>

@@ -10,8 +10,8 @@ void InputController::GetInput() {
 	m_PrevInput = m_CurrInput;
 	m_CurrInput = 0;
 
-	for (size_t i = 0; i < 4; ++i) {
-		if (0x8000 & GetAsyncKeyState((unsigned char)("WASD"[i]))) {
+	for (size_t i = 0; i < 5; ++i) {
+		if (0x8000 & GetAsyncKeyState((unsigned char)("WASDF"[i]))) {
 			m_CurrInput |= BIT_MASK(i);
 		}
 	}

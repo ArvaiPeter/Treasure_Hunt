@@ -48,7 +48,7 @@ const std::vector< std::shared_ptr<GameObject> >& TreasureHuntGameModel::GetLeve
 	return m_Level;
 }
 
-std::shared_ptr<Player> TreasureHuntGameModel::GetPlayer() {
+std::shared_ptr<Player> TreasureHuntGameModel::GetPlayer() const{
 	// TODO: check if dynamic cast is not nullptr
 	auto ret = std::dynamic_pointer_cast<Player>(m_Player);
 	return ret;

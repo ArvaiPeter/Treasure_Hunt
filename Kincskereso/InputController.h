@@ -6,6 +6,7 @@
 #define LEFT 1<<1
 #define DOWN 1<<2
 #define RIGHT 1<<3
+#define TOGGLE_SOLVER 1<<4
 
 class InputController
 {
