@@ -3,6 +3,9 @@
 #include <Windows.h>
 #include <memory>
 #include <string>
+#include <vector>
+
+#include "DrawRect.h"
 
 class ConsoleView
 {
@@ -10,8 +13,10 @@ public:
 	ConsoleView(const unsigned int& screenWidth, const unsigned int& screenHeight);
 	~ConsoleView();
 
-	void DrawFrame();
-	wchar_t* GetScreenBuffer();
+	void DrawFrame(const std::vector<DrawRect>& elementsToDraw);
+
+private:
+	void ClearScreen();
 
 	//TODO: may not be necessary
 	unsigned int ConvertIndexingFrom2D(const unsigned int& x, const unsigned int& y);
