@@ -3,6 +3,7 @@
 #include <map>
 
 #include "GameObjectRepresentations.h"
+#include "GameObjectModifiers.h"
 
 // ============================ Game Object ==================================
 class GameObject
@@ -23,7 +24,7 @@ protected:
 };
 
 
-// ============================ Game Object Modifiers ==================================
+// ============================ Interfaces ==================================
 class IMoveable {
 public:
 	virtual ~IMoveable() = default;
@@ -69,12 +70,15 @@ static std::map<EnvironmentType, wchar_t> EnvRepr = {
 	{EnvironmentType::EXIT, GameObjectRepr::EXIT},
 };
 
-class Environment : public GameObject, public IInteractable{
+class Environment : public GameObject, public IInteractable, public IModifiable{
 public:
 	Environment(const unsigned int& x, const unsigned int& y, EnvironmentType type);
 
-	
 	void Interact(GameObject* with) override;
+
+	void Modify(IModifier* modifier) override;
+
+	bool IsWalkable() const;
 	EnvironmentType GetEnvType() const;
 private:
 	EnvironmentType m_Type;
@@ -94,13 +98,17 @@ static std::map<ConsumableType, wchar_t> ConsumableRepr = {
 	{ConsumableType::TREASURE, GameObjectRepr::TREASURE}
 };
 
-class Consumable : public GameObject, IInteractable {
+class Consumable : public GameObject, public IInteractable, public IModifiable {
 public:
 	Consumable(const unsigned int& x, const unsigned int& y, ConsumableType type);
 
 	wchar_t GetRepresentation() const override;
 	void Interact(GameObject* with) override;
-	bool IsConsumed();
+
+	void Modify(IModifier* modifier) override;
+
+	void SetConsumed(bool newVal);
+	bool IsConsumed() const;
 	ConsumableType GetType() const;
 
 protected:
@@ -109,21 +117,25 @@ protected:
 };
 
 // ============================ Beast ==================================
-class Beast : public GameObject, public IDamageable, IInteractable {
+class Beast : public GameObject, public IDamageable, public IInteractable, public IModifiable {
 public:
 	Beast(const unsigned int& x, const unsigned int& y);
 
 	wchar_t GetRepresentation() const override;
 	void Heal(const uint8_t& amount) override;
 	void Interact(GameObject* with) override;
+
+	void Modify(IModifier* modifier) override;
 };
 
 // ============================ Player ==================================
-class Player : public GameObject, public IMoveable, public IDamageable {
+class Player : public GameObject, public IMoveable, public IDamageable, public IModifiable {
 public:
 	Player(const unsigned int& x, const unsigned int& y);
 
 	void Move(const unsigned int& dX, const unsigned int& dY) override;
+
+	void Modify(IModifier* modifier) override;
 
 	bool IsArmed() const;
 	bool& IsArmed();

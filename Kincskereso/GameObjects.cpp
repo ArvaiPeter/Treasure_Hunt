@@ -19,7 +19,7 @@ unsigned int GameObject::Y() const {
 	return m_Y;
 }
 
-// ============================ Game Object Modifiers ==================================
+// ============================ Interfaces ==================================
 IDamageable::IDamageable(const uint8_t& health, const uint8_t& maxHealth, const bool& alive /*= true*/)
 	: m_Health(health), m_MaxHealth(maxHealth), m_Alive(alive) {}
 
@@ -52,6 +52,23 @@ uint8_t IDamageable::GetMaxHealth() const {
 	return m_MaxHealth;
 }
 
+IModifier::IModifier(IModifiable* subject)
+	: Subject(subject) {}
+
+void IModifier::Apply() {
+	if (!Applied) {
+		Subject->Modify(this);
+		Applied = true;
+	}
+}
+
+void IModifier::Restore() {
+	if (Applied) {
+		Subject->Modify(this);
+		Applied = false;
+	}
+}
+
 // ============================ Environment ==================================
 Environment::Environment(const unsigned int& x, const unsigned int& y, EnvironmentType type)
 	: GameObject(x,y, EnvRepr[type]),
@@ -70,6 +87,16 @@ void Environment::Interact(GameObject* with) {
 	else {
 		//todo ERROR
 	}
+}
+
+void Environment::Modify(IModifier* modifier) {
+	if (auto envMod = dynamic_cast<EnvironmentModifier*>(modifier)) {
+		IModifier::Swap(m_Walkable, envMod->m_Walkable);
+	}
+}
+
+bool Environment::IsWalkable() const {
+	return m_Walkable;
 }
 
 EnvironmentType Environment::GetEnvType() const {
@@ -99,7 +126,7 @@ void Consumable::Interact(GameObject* with) {
 		else if (m_Type == ConsumableType::SWORD) {
 			player->IsArmed() = true;
 		}
-		else if(m_Type == ConsumableType::TREASURE) { // Treasure
+		else if (m_Type == ConsumableType::TREASURE) { // Treasure
 			player->HasTreasure() = true;
 		}
 		else {
@@ -112,7 +139,17 @@ void Consumable::Interact(GameObject* with) {
 	}
 }
 
-bool Consumable::IsConsumed() {
+void Consumable::Modify(IModifier* modifier) {
+	if (auto consumableMod = dynamic_cast<ConsumableModifier*>(modifier)) {
+		IModifier::Swap(m_Consumed, consumableMod->m_Consumed);
+	}
+}
+
+void Consumable::SetConsumed(bool newVal) {
+	m_Consumed = newVal;
+}
+
+bool Consumable::IsConsumed() const{
 	return m_Consumed;
 }
 
@@ -154,6 +191,12 @@ void Beast::Interact(GameObject* with) {
 	}
 }
 
+void Beast::Modify(IModifier* modifier) {
+	if (auto beastMod = dynamic_cast<BeastModifier*>(modifier)) {
+		IModifier::Swap(m_Alive, beastMod->m_IsAlive);
+	}
+}
+
 // ============================ Player ==================================
 Player::Player(const unsigned int& x, const unsigned int& y)
 	: GameObject(x, y, GameObjectRepr::PLAYER), IMoveable(), IDamageable(2, 2), m_Armed(false) {}
@@ -161,6 +204,13 @@ Player::Player(const unsigned int& x, const unsigned int& y)
 void Player::Move(const unsigned int& dX, const unsigned int& dY) {
 	m_X += dX;
 	m_Y += dY;
+}
+
+void Player::Modify(IModifier* modifier) {
+	if (auto playerMod = dynamic_cast<PlayerModifier*>(modifier)) {
+		IModifier::Swap(m_Health, playerMod->m_Health);
+		IModifier::Swap(m_Armed, playerMod->m_IsArmed);
+	}
 }
 
 bool Player::IsArmed() const {
