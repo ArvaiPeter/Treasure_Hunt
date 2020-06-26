@@ -21,7 +21,7 @@ private:
 	ConsoleView m_View;
 	TreasureHuntGameModel m_Model;
 	InputController m_InputController;
-	std::unique_ptr<AstarPathFinder> m_Solver;
+	std::unique_ptr<MissionControll> m_Solver;
 
 	bool m_GameHasEnded;
 	bool m_UserHasControll;

@@ -17,13 +17,14 @@ TreasureHuntGameController::TreasureHuntGameController()
 {
 	// SETUP =======================================
 	m_Model.LoadLevel(L"level_1.txt");
-	m_Solver = std::make_unique<AstarPathFinder>(m_Model);
+	m_Solver = std::make_unique<MissionControll>(m_Model);
 }
 
 void TreasureHuntGameController::Run() {
 
 	std::stack<Node*> pathStack;
-	bool destinationFound = false;
+
+	bool solved = false;
 
 	while (!m_GameHasEnded) {
 		// TIMING  =================================
@@ -45,42 +46,29 @@ void TreasureHuntGameController::Run() {
 			m_UserHasControll = !m_UserHasControll;
 		}
 		
+		int dx = 0;
+		int dy = 0;
+
 		if (m_UserHasControll) {
-			int dx = 0;
-			int dy = 0;
 
 			if (buttonsPressed & UP)				--dy;
 			else if (buttonsPressed & LEFT)			--dx;
 			else if (buttonsPressed & DOWN)			++dy;
 			else if (buttonsPressed & RIGHT)		++dx;
 
-			MovePlayer(dx, dy);
 		}
 		else {
-			// TEST TEST TEST
-			// finding the potion
-			if (!destinationFound) {
-				for (auto obj : lvl) {
-					if (auto consumable = std::dynamic_pointer_cast<Consumable>(obj)) {
-						if (consumable->GetType() == ConsumableType::POTION) {
-							auto found = m_Solver->FindPath(consumable->X(), consumable->Y());
-							destinationFound = true;
-							break;
-						}
-					}
-				}
+			if (!solved) {
+				solved = m_Solver->SolveLevel();
 			}
-
-			if(pathStack.empty())
-				pathStack = std::move(m_Solver->GetPath());
-
-			auto nextStep = pathStack.top();
-			int dx = nextStep->X() - player->X();
-			int dy = nextStep->Y() - player->Y();
-			MovePlayer(dx, dy);
-			pathStack.pop();
-			
+			else {
+				auto nextStep = m_Solver->GetNextStep();
+				dx = nextStep->X() - player->X();
+				dy = nextStep->Y() - player->Y();
+			}
 		}
+
+		MovePlayer(dx, dy);
 
 		// DISPLAY =================================
 		DrawFrame();
