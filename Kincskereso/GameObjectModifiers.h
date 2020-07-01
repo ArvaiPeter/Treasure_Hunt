@@ -5,11 +5,11 @@
 class IModifiable;
 
 template<typename T>
-struct  foo { // TODO rename :D
+struct  ModifierField {
 
 	// OriginalValue can be set to defaultValue too, when Apply() is called its value will change anyway
 	// when Restore() will only actually restore from the OriginalValue once Apply() has been called
-	foo(T defaultValue) : ModifiedValue(defaultValue), OriginalValue(defaultValue), Applied(false) {}
+	ModifierField(T defaultValue) : ModifiedValue(defaultValue), OriginalValue(defaultValue), Applied(false) {}
 
 
 	void SetModifiedValue(T newValue);
@@ -63,7 +63,7 @@ public:
 	}
 
 private:
-	foo<bool> m_Walkable;
+	ModifierField<bool> m_Walkable;
 
 	friend class Environment;
 };
@@ -82,7 +82,7 @@ public:
 	}
 
 private:
-	foo<bool> m_Consumed;
+	ModifierField<bool> m_Consumed;
 
 	friend class Consumable;
 };
@@ -101,7 +101,7 @@ public:
 	}
 
 private:
-	foo<bool> m_IsAlive;
+	ModifierField<bool> m_IsAlive;
 
 	friend class Beast;
 };
@@ -127,8 +127,8 @@ public:
 	}
 	
 private:
-	foo<uint8_t> m_Health;
-	foo<bool> m_IsArmed;
+	ModifierField<uint8_t> m_Health;
+	ModifierField<bool> m_IsArmed;
 
 	friend class Player;
 };
@@ -144,24 +144,24 @@ public:
 
 // FOO =======================================================
 template<typename T>
-void foo<T>::SetModifiedValue(T newValue) {
+void ModifierField<T>::SetModifiedValue(T newValue) {
 	ModifiedValue = newValue;
 }
 
 template<typename T>
-T foo<T>::GetModifiedValue() const {
+T ModifierField<T>::GetModifiedValue() const {
 	return ModifiedValue;
 }
 
 template<typename T>
-void foo<T>::Apply(T& modifiableField) {
+void ModifierField<T>::Apply(T& modifiableField) {
 	OriginalValue = modifiableField;
 	modifiableField = ModifiedValue;
 	Applied = true;
 }
 
 template<typename T>
-void foo<T>::Restore(T& modifiableField) {
+void ModifierField<T>::Restore(T& modifiableField) {
 	if (Applied) {
 		modifiableField = OriginalValue;
 		Applied = false;

@@ -1,56 +1,15 @@
 #pragma once
 
-#include <vector>
-#include <memory>
-#include <stack>
-#include <list>
-#include <queue>
-#include <set>
 
 #include "GameObjects.h"
 #include "TreasureHuntGameModel.h"
+#include "Route.h"
 
-struct Node {
-
-	Node(GameObject* obj,
-		bool isObsacle = false);
-
-	float GlobalGoal;
-	float LocalGoal;
-	bool Visited;
-	bool IsObstacle;
-	Node* ParentNode;
-	GameObject* FieldGameObject;
-	std::vector<Node*> Neighbours;
-
-	unsigned int X() const;
-	unsigned int Y() const;
-
-	void ResetNode();
-};
+#include <set>
 
 struct PathInfo {
 	std::vector<Node*> Enemies;
 	std::vector<Node*> Traps;
-};
-
-struct Route {
-	Route() = default;
-	Route(const Route& other);
-	Route(Route&& other);
-	Route& operator=(const Route& orhet);
-	Route& operator=(Route&& other);
-
-	std::list<Node*> wayPoints; // endpoints of paths
-	std::list< std::list<Node*> > paths; // actual route between endpoints, contains already known goos paths
-	std::vector< std::unique_ptr<IModifier> > modifiers;
-
-	bool successful = false;
-
-	void AddPath(const std::list<Node*>& path);
-
-	bool ContainsWayPoint(const Node* wayPoint);
-	bool IsModified(const GameObject* obj) const;
 };
 
 class MissionControll
@@ -91,5 +50,4 @@ private:
 };
 
 // TODO: move to separate file
-
 int ConvertCoordinates(const unsigned int& x, const unsigned int& y, const unsigned int& width);

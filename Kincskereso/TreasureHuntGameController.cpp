@@ -22,8 +22,6 @@ TreasureHuntGameController::TreasureHuntGameController()
 
 void TreasureHuntGameController::Run() {
 
-	std::stack<Node*> pathStack;
-
 	bool solved = false;
 
 	while (!m_GameHasEnded) {

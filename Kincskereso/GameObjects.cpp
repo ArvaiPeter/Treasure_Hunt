@@ -168,9 +168,7 @@ void Beast::Heal(uint8_t amount) {
 
 void Beast::Interact(GameObject* with) {
 	if (m_Alive) {
-		Player* player = dynamic_cast<Player*>(with);
-
-		if (player) {
+		if (Player* player = dynamic_cast<Player*>(with)) {
 			if (player->IsArmed()) {
 				TakeDamage(m_MaxHealth);
 				player->TakeDamage(1);
