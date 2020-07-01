@@ -30,7 +30,7 @@ void TreasureHuntGameController::Run() {
 		// TIMING  =================================
 		// TODO: rework
 		if (!m_UserHasControll) {
-			std::this_thread::sleep_for(std::chrono::milliseconds(700));
+			std::this_thread::sleep_for(std::chrono::milliseconds(300));
 		}		
 
 		// INPUT  =================================

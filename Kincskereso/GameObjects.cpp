@@ -4,7 +4,7 @@
 
 
 // ============================ Game Object ==================================
-GameObject::GameObject(const unsigned int& x, const unsigned int& y, const wchar_t  repr)
+GameObject::GameObject(unsigned int x, unsigned int y, const wchar_t  repr)
 	: m_X(x), m_Y(y), m_Representation(repr) {}
 
 wchar_t GameObject::GetRepresentation() const {
@@ -20,15 +20,15 @@ unsigned int GameObject::Y() const {
 }
 
 // ============================ Interfaces ==================================
-IDamageable::IDamageable(const uint8_t& health, const uint8_t& maxHealth, const bool& alive /*= true*/)
+IDamageable::IDamageable(uint8_t health, uint8_t maxHealth, bool alive /*= true*/)
 	: m_Health(health), m_MaxHealth(maxHealth), m_Alive(alive) {}
 
-void IDamageable::TakeDamage(const uint8_t& dmg) {
+void IDamageable::TakeDamage(uint8_t dmg) {
 	m_Health -= dmg;
 	m_Alive = m_Health > 0;
 }
 
-void IDamageable::Heal(const uint8_t& amount) {
+void IDamageable::Heal(uint8_t amount) {
 	if (!m_Alive)
 	{
 		return; // maybe throw exception
@@ -52,25 +52,8 @@ uint8_t IDamageable::GetMaxHealth() const {
 	return m_MaxHealth;
 }
 
-IModifier::IModifier(IModifiable* subject)
-	: Subject(subject) {}
-
-void IModifier::Apply() {
-	if (!Applied) {
-		Subject->Modify(this);
-		Applied = true;
-	}
-}
-
-void IModifier::Restore() {
-	if (Applied) {
-		Subject->Modify(this);
-		Applied = false;
-	}
-}
-
 // ============================ Environment ==================================
-Environment::Environment(const unsigned int& x, const unsigned int& y, EnvironmentType type)
+Environment::Environment(unsigned int x, unsigned int y, EnvironmentType type)
 	: GameObject(x,y, EnvRepr[type]),
 	m_Type(type),
 	m_Walkable((type != EnvironmentType::WALL) ? true : false) { }
@@ -91,7 +74,13 @@ void Environment::Interact(GameObject* with) {
 
 void Environment::Modify(IModifier* modifier) {
 	if (auto envMod = dynamic_cast<EnvironmentModifier*>(modifier)) {
-		IModifier::Swap(m_Walkable, envMod->m_Walkable);
+		envMod->m_Walkable.Apply(m_Walkable);
+	}
+}
+
+void Environment::Restore(IModifier* modifier) {
+	if (auto envMod = dynamic_cast<EnvironmentModifier*>(modifier)) {
+		envMod->m_Walkable.Restore(m_Walkable);
 	}
 }
 
@@ -104,7 +93,7 @@ EnvironmentType Environment::GetEnvType() const {
 }
 
 // ============================ Consumable ==================================
-Consumable::Consumable(const unsigned int& x, const unsigned int& y, ConsumableType type)
+Consumable::Consumable(unsigned int x, unsigned int y, ConsumableType type)
 	: GameObject(x, y, ConsumableRepr[type]), m_Type(type), m_Consumed(false) {}
 
 wchar_t Consumable::GetRepresentation() const {
@@ -141,7 +130,13 @@ void Consumable::Interact(GameObject* with) {
 
 void Consumable::Modify(IModifier* modifier) {
 	if (auto consumableMod = dynamic_cast<ConsumableModifier*>(modifier)) {
-		IModifier::Swap(m_Consumed, consumableMod->m_Consumed);
+		consumableMod->m_Consumed.Apply(m_Consumed);
+	}
+}
+
+void Consumable::Restore(IModifier* modifier) {
+	if (auto consumableMod = dynamic_cast<ConsumableModifier*>(modifier)) {
+		consumableMod->m_Consumed.Restore(m_Consumed);
 	}
 }
 
@@ -158,14 +153,14 @@ ConsumableType Consumable::GetType() const {
 }
 
 // ============================ Beast ==================================
-Beast::Beast(const unsigned int& x, const unsigned int& y)
+Beast::Beast(unsigned int x, unsigned int y)
 	: GameObject(x, y, GameObjectRepr::BEAST), IDamageable(1, 1) {}
 
 wchar_t Beast::GetRepresentation() const {
 	return m_Alive ? m_Representation : GameObjectRepr::PATH;
 }
 
-void Beast::Heal(const uint8_t& amount) {
+void Beast::Heal(uint8_t amount) {
 	// healing of Beasts is not possible
 	// todo exception
 	return;
@@ -193,23 +188,36 @@ void Beast::Interact(GameObject* with) {
 
 void Beast::Modify(IModifier* modifier) {
 	if (auto beastMod = dynamic_cast<BeastModifier*>(modifier)) {
-		IModifier::Swap(m_Alive, beastMod->m_IsAlive);
+		beastMod->m_IsAlive.Apply(m_Alive);
+	}
+}
+
+void Beast::Restore(IModifier* modifier) {
+	if (auto beastMod = dynamic_cast<BeastModifier*>(modifier)) {
+		beastMod->m_IsAlive.Restore(m_Alive);
 	}
 }
 
 // ============================ Player ==================================
-Player::Player(const unsigned int& x, const unsigned int& y)
-	: GameObject(x, y, GameObjectRepr::PLAYER), IMoveable(), IDamageable(2, 2), m_Armed(false) {}
+Player::Player(unsigned int x, unsigned int y)
+	: GameObject(x, y, GameObjectRepr::PLAYER), IMoveable(), IDamageable(2, 2), m_Armed(false), m_HasTreasure(false) {}
 
-void Player::Move(const unsigned int& dX, const unsigned int& dY) {
+void Player::Move(unsigned int dX, unsigned int dY) {
 	m_X += dX;
 	m_Y += dY;
 }
 
 void Player::Modify(IModifier* modifier) {
 	if (auto playerMod = dynamic_cast<PlayerModifier*>(modifier)) {
-		IModifier::Swap(m_Health, playerMod->m_Health);
-		IModifier::Swap(m_Armed, playerMod->m_IsArmed);
+		playerMod->m_Health.Apply(m_Health);
+		playerMod->m_IsArmed.Apply(m_Armed);
+	}
+}
+
+void Player::Restore(IModifier* modifier) {
+	if (auto playerMod = dynamic_cast<PlayerModifier*>(modifier)) {
+		playerMod->m_Health.Restore(m_Health);
+		playerMod->m_IsArmed.Restore(m_Armed);
 	}
 }
 

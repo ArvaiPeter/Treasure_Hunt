@@ -35,14 +35,22 @@ struct PathInfo {
 };
 
 struct Route {
+	Route() = default;
+	Route(const Route& other);
+	Route(Route&& other);
+	Route& operator=(const Route& orhet);
+	Route& operator=(Route&& other);
+
 	std::list<Node*> wayPoints; // endpoints of paths
 	std::list< std::list<Node*> > paths; // actual route between endpoints, contains already known goos paths
-	std::vector< std::shared_ptr<IModifier> > modifiers;
+	std::vector< std::unique_ptr<IModifier> > modifiers;
 
 	bool successful = false;
 
 	void AddPath(const std::list<Node*>& path);
+
 	bool ContainsWayPoint(const Node* wayPoint);
+	bool IsModified(const GameObject* obj) const;
 };
 
 class MissionControll
@@ -71,7 +79,7 @@ private:
 	void ApplyModifiers(const Route& route);
 	void ResetModifiers(const Route& route);
 
-	std::shared_ptr<PlayerModifier> GetPlayerMod(Route& route);
+	PlayerModifier* GetPlayerMod(Route& route);
 
 private:
 	const TreasureHuntGameModel& m_Level;

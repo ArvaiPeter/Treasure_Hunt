@@ -29,6 +29,56 @@ void Node::ResetNode() {
 }
 
 // ROUTE ================================================
+Route::Route(const Route& other) {
+	wayPoints = other.wayPoints;
+	paths = other.paths;
+	
+	modifiers.clear();
+	for (const auto& mod : other.modifiers) {
+		modifiers.push_back(mod->Clone());
+	}
+
+	successful = other.successful;
+}
+
+Route::Route(Route&& other) {
+	wayPoints = other.wayPoints;
+	paths = other.paths;
+
+	modifiers.clear();
+	for (const auto& mod : other.modifiers) {
+		modifiers.push_back(mod->Clone());
+	}
+
+	successful = other.successful;
+}
+
+Route& Route::operator=(const Route& other) {
+	wayPoints = other.wayPoints;
+	paths = other.paths;
+
+	modifiers.clear();
+	for (const auto& mod : other.modifiers) {
+		modifiers.push_back(mod->Clone());
+	}
+
+	successful = other.successful;
+	return *this;
+}
+
+Route& Route::operator=(Route&& other) {
+	wayPoints = other.wayPoints;
+	paths = other.paths;
+
+	modifiers.clear();
+	for (const auto& mod : other.modifiers) {
+		modifiers.push_back(mod->Clone());
+	}
+
+	successful = other.successful;
+	return *this;
+}
+
 
 void Route::AddPath(const std::list<Node*>& path) 
 {
@@ -37,6 +87,16 @@ void Route::AddPath(const std::list<Node*>& path)
 
 bool Route::ContainsWayPoint(const Node* wayPoint) {
 	return std::find(wayPoints.begin(), wayPoints.end(), wayPoint) != wayPoints.end();
+}
+
+bool Route::IsModified(const GameObject* obj) const{
+	for (auto& mod : modifiers) {
+		if (dynamic_cast<GameObject*>(mod->Subject) == obj) {
+			return true;
+		}
+	}
+
+	return false;
 }
 
 // MISSION CONTROLL =====================================
@@ -209,16 +269,18 @@ std::vector<Route> MissionControll::FindRoutes(Route& currRoute) {
 			currRoute.AddPath(path);
 
 			for (auto trap : pathInfo.Traps) {
-				currRoute.modifiers.push_back(
-					std::make_shared<EnvironmentModifier>(dynamic_cast<IModifiable*>(trap->FieldGameObject), false)
-				);
+				if (!currRoute.IsModified(trap->FieldGameObject)) {
+					currRoute.modifiers.push_back(
+						std::make_unique<EnvironmentModifier>(dynamic_cast<IModifiable*>(trap->FieldGameObject), false)
+					);
+				}
 			}
 
 			auto playerMod = GetPlayerMod(currRoute);
 
 			if (auto consumable = dynamic_cast<Consumable*>((*end)->FieldGameObject)) {
 				currRoute.modifiers.push_back(
-					std::make_shared<ConsumableModifier>(dynamic_cast<IModifiable*>(consumable), true)
+					std::make_unique<ConsumableModifier>(dynamic_cast<IModifiable*>(consumable), true)
 				);
 								
 				switch (consumable->GetType())
@@ -233,15 +295,17 @@ std::vector<Route> MissionControll::FindRoutes(Route& currRoute) {
 					break;
 				}
 			}
-			else if (auto beast = dynamic_cast<Beast*>((*end)->FieldGameObject)) {
-				currRoute.modifiers.push_back(std::make_shared<BeastModifier>(dynamic_cast<IModifiable*>(beast), false));
-				playerMod->AddHealth(-1);
-			}
 			else if (auto environment = dynamic_cast<Environment*>((*end)->FieldGameObject)) {
 				if (environment->GetEnvType() == EnvironmentType::EXIT) {
 					currRoute.successful = true;
 				}
 			}
+
+			for (auto enemy : pathInfo.Enemies) {
+				currRoute.modifiers.push_back(std::make_unique<BeastModifier>(dynamic_cast<IModifiable*>(enemy->FieldGameObject), false));
+				playerMod->AddHealth(-1);
+			}
+
 		}
 		else {
 			
@@ -260,12 +324,10 @@ std::vector<Route> MissionControll::FindRoutes(Route& currRoute) {
 			}
 			else if (pathInfo.Enemies.size() > 1) {
 				// paths need to be split untill only one enemy remains in each -> in the next iterations a potion can be added between them
-				// enemies needed to be added from closest to furthest -> GetPathInfo scanns the path in this order so no problem
+				// only the first enemi is added, further planning will be done in future iterations
 
-				for (auto i = pathInfo.Enemies.end(); i != pathInfo.Enemies.begin(); --i) {
-					currRoute.wayPoints.insert(end, *(i - 1));
-					end--;
-				}
+				currRoute.wayPoints.insert(end, pathInfo.Enemies.front());
+				end--;
 			}
 			else {
 				Node* potion = FindBestPotion(*start);
@@ -280,6 +342,8 @@ std::vector<Route> MissionControll::FindRoutes(Route& currRoute) {
 			}
 		}
 		
+		ResetModifiers(currRoute);
+
 		if (saveRoute) {
 			Route newRoute = currRoute;
 			newRoutes.emplace_back(newRoute);
@@ -287,6 +351,7 @@ std::vector<Route> MissionControll::FindRoutes(Route& currRoute) {
 
 		// restoring currRoute for the other possible paths
 		currRoute = currRouteCopy;
+		ApplyModifiers(currRoute);
 	}
 
 	ResetModifiers(currRoute);
@@ -428,8 +493,11 @@ void MissionControll::ResetNodes() {
 }
 
 void MissionControll::ApplyModifiers(const Route& route) {
-	for (auto mod : route.modifiers) {
-		if (auto envMod = std::dynamic_pointer_cast<EnvironmentModifier>(mod))
+	for (auto& mod : route.modifiers) {
+
+		mod->Apply();
+
+		if (auto envMod = dynamic_cast<EnvironmentModifier*>(mod.get()))
 		{
 			auto subject = dynamic_cast<GameObject*>(envMod->Subject);
 			auto subjectsNode = std::find_if(m_Nodes.begin(), m_Nodes.end(), [subject](std::shared_ptr<Node> node)
@@ -439,20 +507,24 @@ void MissionControll::ApplyModifiers(const Route& route) {
 			);
 
 			if (subjectsNode != m_Nodes.end()) {
-				SetObstacle(subjectsNode->get(), !envMod->GetWalkable());
+				auto env = dynamic_cast<Environment*>(subjectsNode->get()->FieldGameObject);
+				SetObstacle(subjectsNode->get(), !env->IsWalkable());
 			}
 			else {
 				//error
 			}
 		}
 
-		mod->Apply();
+		
 	}
 }
 
 void MissionControll::ResetModifiers(const Route& route) {
-	for (auto mod : route.modifiers) {
-		if (auto envMod = std::dynamic_pointer_cast<EnvironmentModifier>(mod))
+	for (auto& mod : route.modifiers) {
+
+		mod->Restore();
+
+		if (auto envMod = dynamic_cast<EnvironmentModifier*>(mod.get()))
 		{
 			auto subject = dynamic_cast<GameObject*>(envMod->Subject);
 			auto subjectsNode = std::find_if(m_Nodes.begin(), m_Nodes.end(), [subject](std::shared_ptr<Node> node)
@@ -462,21 +534,22 @@ void MissionControll::ResetModifiers(const Route& route) {
 			);
 
 			if (subjectsNode != m_Nodes.end()) {
-				SetObstacle(subjectsNode->get(), !envMod->GetWalkable());
+				auto env = dynamic_cast<Environment*>(subjectsNode->get()->FieldGameObject);
+				SetObstacle(subjectsNode->get(), !env->IsWalkable());
 			}
 			else {
 				//error
 			}
 		}
 
-		mod->Restore();
+		
 	}
 }
 
-std::shared_ptr<PlayerModifier> MissionControll::GetPlayerMod(Route& route) {
-	auto playerModIt = std::find_if(route.modifiers.begin(), route.modifiers.end(), [](std::shared_ptr<IModifier> mod)
+PlayerModifier* MissionControll::GetPlayerMod(Route& route) {
+	auto playerModIt = std::find_if(route.modifiers.begin(), route.modifiers.end(), [](std::unique_ptr<IModifier>& mod)
 		{
-			if (auto playerMod = std::dynamic_pointer_cast<PlayerModifier>(mod)) {
+			if (auto playerMod = dynamic_cast<PlayerModifier*>(mod.get())) {
 				return true;
 			}
 			return false;
@@ -486,17 +559,17 @@ std::shared_ptr<PlayerModifier> MissionControll::GetPlayerMod(Route& route) {
 	if (playerModIt == route.modifiers.end()) {
 		auto player = m_Level.GetPlayer();
 
-		auto playerMod = std::make_shared<PlayerModifier>(
-			dynamic_cast<IModifiable*>(player.get()),
-			player->GetHealth(),
-			player->IsArmed()		
-		);
+		route.modifiers.push_back(
+			std::make_unique<PlayerModifier>(
+				dynamic_cast<IModifiable*>(player.get()),
+				player->GetHealth(),
+				player->IsArmed()
+			));
 
-		route.modifiers.push_back(playerMod);
-		return playerMod;
+		return dynamic_cast<PlayerModifier*>(route.modifiers.back().get());
 	}
 	else {
-		return std::dynamic_pointer_cast<PlayerModifier>(*playerModIt);
+		return dynamic_cast<PlayerModifier*>(playerModIt->get());
 	}
 }
 
