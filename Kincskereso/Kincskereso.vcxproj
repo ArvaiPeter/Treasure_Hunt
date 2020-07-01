@@ -144,6 +144,9 @@
     <ClCompile Include="GameObjectModifiers.cpp" />
     <ClCompile Include="GameObjects.cpp" />
     <ClCompile Include="InputController.cpp" />
+    <ClCompile Include="MainMenuController.cpp" />
+    <ClCompile Include="Node.cpp" />
+    <ClCompile Include="Route.cpp" />
     <ClCompile Include="Solver.cpp" />
     <ClCompile Include="TreasureHunt.cpp" />
     <ClCompile Include="TreasureHuntGameController.cpp" />
@@ -156,7 +159,11 @@
     <ClInclude Include="GameObjectModifiers.h" />
     <ClInclude Include="GameObjectRepresentations.h" />
     <ClInclude Include="GameObjects.h" />
+    <ClInclude Include="GameOutcome.h" />
     <ClInclude Include="InputController.h" />
+    <ClInclude Include="MainMenuController.h" />
+    <ClInclude Include="Node.h" />
+    <ClInclude Include="Route.h" />
     <ClInclude Include="Solver.h" />
     <ClInclude Include="TreasureHuntGameController.h" />
     <ClInclude Include="TreasureHuntGameModel.h" />

@@ -8,7 +8,7 @@
 class TreasureHuntGameController
 {
 public:
-	TreasureHuntGameController();
+	TreasureHuntGameController(InputController& inputController, ConsoleView& consoleView);
 
 	void Run();
 
@@ -18,15 +18,13 @@ private:
 					const unsigned int& toY	);
 
 private:
-	ConsoleView m_View;
+	ConsoleView& m_View;
+	InputController& m_InputController;
 	TreasureHuntGameModel m_Model;
-	InputController m_InputController;
 	std::unique_ptr<MissionControll> m_Solver;
 
 	bool m_GameHasEnded;
 	bool m_UserHasControll;
 
-	static const unsigned int m_ScreenWidth;
-	static const unsigned int m_ScreenHeight;
 };
 

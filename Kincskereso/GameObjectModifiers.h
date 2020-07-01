@@ -142,7 +142,7 @@ public:
 
 // IMPLEMENTATIONS ============================================
 
-// FOO =======================================================
+// ModifierField =======================================================
 template<typename T>
 void ModifierField<T>::SetModifiedValue(T newValue) {
 	ModifiedValue = newValue;

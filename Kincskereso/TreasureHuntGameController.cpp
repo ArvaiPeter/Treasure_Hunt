@@ -4,14 +4,13 @@
 #include "TreasureHuntGameController.h"
 #include "DrawRect.h"
 
-const unsigned int TreasureHuntGameController::m_ScreenWidth = 80;
-const unsigned int TreasureHuntGameController::m_ScreenHeight = 50;
 
 
-TreasureHuntGameController::TreasureHuntGameController()
-	: m_View(ConsoleView(m_ScreenWidth, m_ScreenHeight)),
+
+TreasureHuntGameController::TreasureHuntGameController(InputController& inputController, ConsoleView& consoleView)
+	: m_View(consoleView),
+	m_InputController(inputController),
 	m_Model(TreasureHuntGameModel()),
-	m_InputController(),
 	m_GameHasEnded(false),
 	m_UserHasControll(true)
 {

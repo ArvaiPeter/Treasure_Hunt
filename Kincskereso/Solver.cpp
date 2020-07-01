@@ -1,6 +1,7 @@
 #include "Solver.h"
 
 #include <list>
+#include <queue>
 
 // MISSION CONTROLL =====================================
 MissionControll::MissionControll(const TreasureHuntGameModel& lvl)

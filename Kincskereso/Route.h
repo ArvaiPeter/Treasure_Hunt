@@ -4,7 +4,6 @@
 #include <vector>
 #include <memory>
 
-#include "GameObjects.h"
 #include "Node.h"
 
 struct Route {

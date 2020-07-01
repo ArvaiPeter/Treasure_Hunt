@@ -7,6 +7,9 @@
 #define DOWN 1<<2
 #define RIGHT 1<<3
 #define TOGGLE_SOLVER 1<<4
+#define SELECT 1<<5
+
+#include <string>
 
 class InputController
 {
@@ -21,5 +24,7 @@ public:
 private:
 	char m_CurrInput;
 	char m_PrevInput;
+
+	static const std::string keysWatched;
 };
 
