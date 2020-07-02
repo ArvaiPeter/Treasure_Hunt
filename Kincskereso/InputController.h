@@ -32,9 +32,6 @@ public:
 	InputController();
 
 	void GetInput();
-	// TODO: better names :S
-	//const char InputChanged();
-	//const char ButtonsPressed();
 
 private:
 	void RaiseButtonPressed();

@@ -4,8 +4,6 @@
 
 #include "GameObjects.h"
 
-
-
 class GameObjectFactory
 {
 public:

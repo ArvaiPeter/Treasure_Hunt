@@ -60,7 +60,3 @@ void ConsoleView::ClearScreen() {
 		m_Screen[i] = L' ';
 	}
 }
-
-unsigned int ConsoleView::ConvertIndexingFrom2D(const unsigned int& x, const unsigned int& y) {
-	return x * m_ScreenWidth + y;
-}

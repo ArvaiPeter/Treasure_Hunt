@@ -28,7 +28,7 @@ GameObject* GameObjectFactory::CreateGameObject(const unsigned int& x, const uns
 	case ' ':
 		return new Environment(x, y, EnvironmentType::PATH);
 	default:
-		// TODO: error unrecognised game object
+		throw "Unrecognised Game Object";
 		break;
 	}
 }

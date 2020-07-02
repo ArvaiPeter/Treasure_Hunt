@@ -10,6 +10,8 @@ MainMenuModel::MainMenuModel()
 {}
 
 void MainMenuModel::LoadBanner(const std::wstring& fileName) {
+	if (fileName.empty()) throw "LoadBanner(): fileName cant be empty";
+
 	const std::wstring bannerFilePath = AssetFolderPath + L"\\" + fileName;
 
 	std::wifstream bannerFile(bannerFilePath.c_str(), std::ifstream::in);

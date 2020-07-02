@@ -12,7 +12,7 @@ Route::Route(const Route& other) {
 	successful = other.successful;
 }
 
-Route::Route(Route&& other) {
+Route::Route(Route&& other) noexcept {
 	wayPoints = other.wayPoints;
 	paths = other.paths;
 
@@ -37,7 +37,7 @@ Route& Route::operator=(const Route& other) {
 	return *this;
 }
 
-Route& Route::operator=(Route&& other) {
+Route& Route::operator=(Route&& other) noexcept{
 	wayPoints = other.wayPoints;
 	paths = other.paths;
 

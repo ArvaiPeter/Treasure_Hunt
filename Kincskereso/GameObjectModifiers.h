@@ -4,6 +4,7 @@
 
 class IModifiable;
 
+// MODIFIER FIELD =================================================
 template<typename T>
 struct  ModifierField {
 
@@ -25,6 +26,7 @@ private:
 	bool Applied;
 };
 
+// IMODIFIER ========================================================
 class IModifier {
 public:
 	IModifier(IModifiable* subject);
@@ -45,6 +47,7 @@ struct ModifierComparator {
 	}
 };
 
+// ENVIRONMENT MODIFIER ==============================================
 class EnvironmentModifier : public IModifier {
 public:
 	EnvironmentModifier(IModifiable* subject, bool walkable) : IModifier(subject), m_Walkable(walkable) {}
@@ -68,6 +71,7 @@ private:
 	friend class Environment;
 };
 
+// CONSUMABLE MODIFIER ================================================
 class ConsumableModifier : public IModifier {
 public:
 	ConsumableModifier(IModifiable* subjecet, bool consumed) : IModifier(subjecet), m_Consumed(consumed) {}
@@ -87,6 +91,7 @@ private:
 	friend class Consumable;
 };
 
+// BEAST MODIFIER ===================================================
 class BeastModifier : public IModifier {
 public:
 	BeastModifier(IModifiable* subject, bool isAlive) : IModifier(subject), m_IsAlive(isAlive) {}
@@ -106,6 +111,7 @@ private:
 	friend class Beast;
 };
 
+// PLAYER MODIFIER ====================================================
 class PlayerModifier : public IModifier {
 public:
 	PlayerModifier(IModifiable* subject, uint8_t health, bool isArmed) : IModifier(subject), m_Health(health), m_IsArmed(isArmed) {}
@@ -133,6 +139,7 @@ private:
 	friend class Player;
 };
 
+// IMODIFIABLE =========================================================
 class IModifiable {
 public:
 	virtual ~IModifiable() = default;
@@ -140,7 +147,7 @@ public:
 	virtual void Restore(IModifier* modifier) = 0;
 };
 
-// IMPLEMENTATIONS ============================================
+// IMPLEMENTATIONS ====================================================
 
 // ModifierField =======================================================
 template<typename T>

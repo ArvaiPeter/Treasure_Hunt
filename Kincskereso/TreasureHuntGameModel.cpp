@@ -20,11 +20,11 @@ void TreasureHuntGameModel::ResetModel(const std::wstring& lvlName /*=L""*/) {
 }
 
 void TreasureHuntGameModel::LoadLevel(const std::wstring& lvlName) {
-	// TODO: error handling
+	if (lvlName.empty()) throw "LoadLevel() lvlName can't be empty";
 
 	m_LevelName = lvlName;
 	//finding file
-	const std::wstring fullLvlPath = AssetFolderPath + L"\\Levels\\" + m_LevelName;
+	const std::wstring fullLvlPath = LevelsFolder + m_LevelName;
 
 	//reading file and populating m_Level;
 	std::ifstream lvlFile(fullLvlPath.c_str(), std::ifstream::in);
@@ -62,7 +62,6 @@ const std::vector< std::shared_ptr<GameObject> >& TreasureHuntGameModel::GetLeve
 }
 
 std::shared_ptr<Player> TreasureHuntGameModel::GetPlayer() const{
-	// TODO: check if dynamic cast is not nullptr
 	auto ret = std::dynamic_pointer_cast<Player>(m_Player);
 	return ret;
 }

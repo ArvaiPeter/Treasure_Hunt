@@ -31,7 +31,7 @@ void IDamageable::TakeDamage(uint8_t dmg) {
 void IDamageable::Heal(uint8_t amount) {
 	if (!m_Alive)
 	{
-		return; // maybe throw exception
+		throw "GameObject is dead, cant heal it";
 	}
 
 	m_Health += amount;
@@ -66,9 +66,6 @@ void Environment::Interact(GameObject* with) {
 			m_Representation = GameObjectRepr::WALL;
 			m_Walkable = false;
 		}
-	}
-	else {
-		//todo ERROR
 	}
 }
 
@@ -119,12 +116,8 @@ void Consumable::Interact(GameObject* with) {
 			player->HasTreasure() = true;
 		}
 		else {
-			m_Consumed = false; //?
-			// TODO error -> new unhandled enum value
+			throw "Unrecognised Consumable Type";
 		}
-	}
-	else {
-		// TODO error 
 	}
 }
 
@@ -162,7 +155,6 @@ wchar_t Beast::GetRepresentation() const {
 
 void Beast::Heal(uint8_t amount) {
 	// healing of Beasts is not possible
-	// todo exception
 	return;
 }
 
@@ -176,10 +168,6 @@ void Beast::Interact(GameObject* with) {
 			else {
 				player->TakeDamage(player->GetHealth());
 			}
-		}
-		else {
-			// with is not an instance of Player -> error
-			// Non-player gameobjects can only interact with the player
 		}
 	}
 }

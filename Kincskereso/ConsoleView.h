@@ -18,9 +18,6 @@ public:
 private:
 	void ClearScreen();
 
-	//TODO: may not be necessary
-	unsigned int ConvertIndexingFrom2D(const unsigned int& x, const unsigned int& y);
-
 private:
 	unsigned int m_ScreenWidth;
 	unsigned int m_ScreenHeight;

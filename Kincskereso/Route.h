@@ -9,9 +9,9 @@
 struct Route {
 	Route() = default;
 	Route(const Route& other);
-	Route(Route&& other);
+	Route(Route&& other) noexcept;
 	Route& operator=(const Route& orhet);
-	Route& operator=(Route&& other);
+	Route& operator=(Route&& other) noexcept;
 
 	std::list<Node*> wayPoints; // waypoints of paths
 	std::list< std::list<Node*> > paths; // actual route between endpoints, contains already known good paths

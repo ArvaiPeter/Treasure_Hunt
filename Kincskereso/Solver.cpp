@@ -58,6 +58,8 @@ MissionControll::MissionControll(const TreasureHuntGameModel& lvl)
 }
 
 bool MissionControll::FindPath(Node* from, Node* to, std::list<Node*>& outPath) {
+	// A* pathfinding algorithm based on https://github.com/OneLoneCoder/videos/blob/master/OneLoneCoder_PathFinding_AStar.cpp
+
 	ResetNodes();
 
 	auto lvlDimensions = m_Level.GetLevelDimensions();
@@ -161,8 +163,8 @@ std::vector<Route> MissionControll::FindRoutes(Route& currRoute) {
 	auto end = currRoute.wayPoints.begin();
 	auto start = end++;
 
-	for (auto _ : currRoute.paths) { ++start; ++end; }
-	ApplyModifiers(currRoute);
+	for (auto _ : currRoute.paths) { ++start; ++end; } // currRoute.paths containts the already explored good routes -> this is a way to "walk along" that path until the next unexplored waypoint
+	ApplyModifiers(currRoute); // restoring the state of currRoute so further planning would be correct ( for example so we dont plan to an already consumed potion again )
 
 	for (auto path : FindAllPaths(*start, *end)) {
 
@@ -170,6 +172,8 @@ std::vector<Route> MissionControll::FindRoutes(Route& currRoute) {
 		auto pathInfo = GetPathInfo(path);
 
 		if (WouldSurvivePath(path)) {
+			// if path is survivable a modifier has to be added for every consumable, trap, enemy and player along the path
+
 			currRoute.AddPath(path);
 
 			for (auto trap : pathInfo.Traps) {
@@ -212,7 +216,7 @@ std::vector<Route> MissionControll::FindRoutes(Route& currRoute) {
 
 		}
 		else {
-			
+			// if the path is not survivable then a waypoint to a corrective consumable has to be added
 			auto sword = std::find_if(m_WayPoints.begin(), m_WayPoints.end(), [](Node* node)
 				{
 					if (auto consumable = dynamic_cast<Consumable*>(node->FieldGameObject)) {
@@ -224,11 +228,11 @@ std::vector<Route> MissionControll::FindRoutes(Route& currRoute) {
 			
 			if (!m_Level.GetPlayer()->IsArmed() && !currRoute.ContainsWayPoint(*sword)) {
 				currRoute.wayPoints.insert(end, *sword);
-				end--;
+				end--; // after insert the end() iterator will change -> this will cause a problem on the next iteration of the loop after on line 261 currRoute is restored
 			}
 			else if (pathInfo.Enemies.size() > 1) {
 				// paths need to be split untill only one enemy remains in each -> in the next iterations a potion can be added between them
-				// only the first enemi is added, further planning will be done in future iterations
+				// only the first enemy is added, further planning will be done in future iterations
 
 				currRoute.wayPoints.insert(end, pathInfo.Enemies.front());
 				end--;
@@ -241,11 +245,13 @@ std::vector<Route> MissionControll::FindRoutes(Route& currRoute) {
 					end--;
 				}
 				else {
+					// if the path is not survivable, the player is armed and there are no potions left then the route is a dead end -> shouldnt be saved
 					saveRoute = false;
 				}
 			}
 		}
 		
+		// reseting modifiers so newRoute wouldnt contain applied mods
 		ResetModifiers(currRoute);
 
 		if (saveRoute) {
@@ -255,6 +261,8 @@ std::vector<Route> MissionControll::FindRoutes(Route& currRoute) {
 
 		// restoring currRoute for the other possible paths
 		currRoute = currRouteCopy;
+
+		// reaplying modifiers for the next iteration of the loop
 		ApplyModifiers(currRoute);
 	}
 
@@ -264,6 +272,9 @@ std::vector<Route> MissionControll::FindRoutes(Route& currRoute) {
 }
 
 bool MissionControll::SolveLevel() {
+
+	//initial route: players position -> treasure -> exit
+	//additional waypoints will be added in FindRoutes() if neccessary
 	Route initialRoute;
 
 	auto player = m_Level.GetPlayer();
@@ -289,6 +300,7 @@ bool MissionControll::SolveLevel() {
 	initialRoute.wayPoints.push_front((*treasure).get());
 	initialRoute.wayPoints.push_front(playerNode);
 
+	//iterative "version" of backtracking using a queue
 	std::queue<Route> routesToExplore;
 	routesToExplore.push(initialRoute);
 
@@ -296,6 +308,7 @@ bool MissionControll::SolveLevel() {
 		auto nextRoute = routesToExplore.front();
 		routesToExplore.pop();
 
+		// finding all the possible continuations of nextRoute and adding them  to the end of the exploration queue
 		for (auto newRoute : FindRoutes(nextRoute)) {
 			if (newRoute.successful) {
 				m_FoundPaths = newRoute.paths;
@@ -327,6 +340,7 @@ Node* MissionControll::FindBestPotion(Node* from) {
 		}
 	}
 
+	// sorting all good paths using their length as comparisos
 	std::sort(goodPaths.begin(), goodPaths.end(), [](const std::list<Node*>& a, const std::list<Node*>& b)
 		{
 			return a.size() < b.size();
@@ -339,18 +353,18 @@ bool MissionControll::WouldSurvivePath(const std::list<Node*>& path) {
 	auto pathInfo = GetPathInfo(path);
 	auto player = m_Level.GetPlayer();
 
-	return !( (pathInfo.Enemies.size() > 0 && !player->IsArmed()) || (player->GetHealth() <= pathInfo.Enemies.size() ) );
+	return !( ( pathInfo.Enemies.size() > 0 && !player->IsArmed() ) || (player->GetHealth() <= pathInfo.Enemies.size() ) );
 }
 
 void MissionControll::SetObstacle(Node* node, bool value) {
-	// todo error handling
+	if (!node) throw "SetObstace() node pointer can't be nullptr";
 	node->IsObstacle = value;
 }
 
 PathInfo MissionControll::GetPathInfo(std::list<Node*> path) const {
 	PathInfo pathInfo;
 
-	// we dont care about the start and ending node
+	// we dont care about the start node, because we know that'a where the player is
 	for (auto node = ++path.begin(); node != path.end(); ++node) {
 		if (auto beast = dynamic_cast<Beast*>((*node)->FieldGameObject)) {
 			if (beast->IsAlive()) 
@@ -401,6 +415,7 @@ void MissionControll::ApplyModifiers(const Route& route) {
 
 		mod->Apply();
 
+		// traps need to be set as an obstacle for the pathfinding algorithm
 		if (auto envMod = dynamic_cast<EnvironmentModifier*>(mod.get()))
 		{
 			auto subject = dynamic_cast<GameObject*>(envMod->Subject);
@@ -415,7 +430,7 @@ void MissionControll::ApplyModifiers(const Route& route) {
 				SetObstacle(subjectsNode->get(), !env->IsWalkable());
 			}
 			else {
-				//error
+				throw "An environment modifier was pointing to a non existant Node. hmmm ... this shouldnt happen";
 			}
 		}
 
@@ -442,7 +457,7 @@ void MissionControll::ResetModifiers(const Route& route) {
 				SetObstacle(subjectsNode->get(), !env->IsWalkable());
 			}
 			else {
-				//error
+				throw "An environment modifier was pointing to a non existant Node. hmmm ... this shouldnt happen";
 			}
 		}
 

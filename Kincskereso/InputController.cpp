@@ -60,11 +60,3 @@ void InputController::RaiseEvent(InputEvent& event, char buttons) {
 	if (buttons & _F) event.RaiseEvent(BUTTON::TOGGLE_SOLVER);
 	if (buttons & _ENTER) event.RaiseEvent(BUTTON::SELECT);
 }
-
-//const char InputController::InputChanged() {
-//	return (char)(m_CurrInput ^ m_PrevInput);
-//}
-//
-//const char InputController::ButtonsPressed() {
-//	return (char)((m_CurrInput ^ m_PrevInput) & m_CurrInput);
-//}
