@@ -21,6 +21,8 @@ private:
 	void MovePlayer(const unsigned int& toX,
 					const unsigned int& toY	);
 
+	void OnButtonPressed(BUTTON btn);
+
 private:
 	ConsoleView& m_View;
 	InputController& m_InputController;
@@ -29,6 +31,5 @@ private:
 
 	bool m_GameHasEnded;
 	bool m_UserHasControll;
-
 };
 

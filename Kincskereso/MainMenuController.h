@@ -14,12 +14,17 @@ public:
 	void SetLastOutCome(GAME_OUTCOME lastOutcome);
 
 private:
-	void Display(const uint8_t selectedMenuItem);
+	void Display();
+
+	void OnButtonPressed(BUTTON btn);
 
 private:
 	InputController& m_InputController;
 	ConsoleView& m_View;
 	MainMenuModel m_Model;
 	GAME_OUTCOME m_LastOutcome;
+
+	uint8_t m_SelectedMenuItemIndex;
+	bool m_MenuItemSelected;
 };
 

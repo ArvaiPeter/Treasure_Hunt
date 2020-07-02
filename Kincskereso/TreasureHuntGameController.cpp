@@ -17,6 +17,8 @@ TreasureHuntGameController::TreasureHuntGameController(InputController& inputCon
 	// SETUP =======================================
 	m_Model.LoadLevel(L"level_1.txt");
 	m_Solver = std::make_unique<MissionControll>(m_Model);
+	m_InputController.ButtonPressedEvent.Subscribe(
+		std::bind(&TreasureHuntGameController::OnButtonPressed, this, std::placeholders::_1));
 }
 
 void TreasureHuntGameController::ResetGame() {
@@ -40,38 +42,19 @@ GAME_OUTCOME TreasureHuntGameController::Run() {
 		m_InputController.GetInput();
 
 		// LOGIC   =================================
-		auto& lvl = m_Model.GetLevel();
-		auto player = m_Model.GetPlayer();
 
-		const char buttonsPressed = m_InputController.ButtonsPressed();
+		// maybe move to separate thread with timing
+		if (!m_UserHasControll) {
+			auto player = m_Model.GetPlayer();
+			int dx = 0;
+			int dy = 0;
 
-		if (buttonsPressed & TOGGLE_SOLVER) {
-			m_UserHasControll = !m_UserHasControll;
+			auto nextStep = m_Solver->GetNextStep();
+			dx = nextStep->X() - player->X();
+			dy = nextStep->Y() - player->Y();
+
+			MovePlayer(dx, dy);
 		}
-		
-		int dx = 0;
-		int dy = 0;
-
-		if (m_UserHasControll) {
-
-			if (buttonsPressed & UP)				--dy;
-			else if (buttonsPressed & LEFT)			--dx;
-			else if (buttonsPressed & DOWN)			++dy;
-			else if (buttonsPressed & RIGHT)		++dx;
-
-		}
-		else {
-			if (!solved) {
-				solved = m_Solver->SolveLevel();
-			}
-			else {
-				auto nextStep = m_Solver->GetNextStep();
-				dx = nextStep->X() - player->X();
-				dy = nextStep->Y() - player->Y();
-			}
-		}
-
-		MovePlayer(dx, dy);
 
 		// DISPLAY =================================
 		DrawFrame();
@@ -117,6 +100,10 @@ void TreasureHuntGameController::DrawFrame() {
 	weapon += player->IsArmed() ? L"SWORD" : L"NONE";
 	screenElements.emplace_back(levelDimensions.first + 3, 1, weapon.length(), 1, weapon);
 
+	std::wstring controll = L"CONTROLL: ";
+	controll += m_UserHasControll ? L"PLAYER" : L"COMPUTER";
+	screenElements.emplace_back(levelDimensions.first + 3, 2, controll.length(), 1, controll);
+
 	m_View.DrawFrame(screenElements);
 }
 
@@ -160,4 +147,38 @@ void TreasureHuntGameController::MovePlayer(
 		player->Move(dX, dY);
 	}
 
+}
+
+void TreasureHuntGameController::OnButtonPressed(BUTTON btn) {
+	
+	int dx = 0;
+	int dy = 0;
+	
+	if (m_UserHasControll) {
+		switch (btn) {
+		case BUTTON::UP:
+			--dy;
+			break;
+		case BUTTON::LEFT:
+			--dx;
+			break;
+		case BUTTON::DOWN:
+			++dy;
+			break;
+		case BUTTON::RIGHT:
+			++dx;
+			break;
+		}
+
+		MovePlayer(dx, dy);
+	}
+
+	if (btn == BUTTON::TOGGLE_SOLVER) {
+		m_UserHasControll = !m_UserHasControll;
+
+		if (!m_UserHasControll) {
+			m_Solver = std::make_unique<MissionControll>(m_Model);
+			m_Solver->SolveLevel();
+		}
+	}
 }

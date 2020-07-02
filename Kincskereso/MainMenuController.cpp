@@ -5,32 +5,31 @@
 MainMenuController::MainMenuController(InputController& inputController, ConsoleView& consoleView)
 	: m_InputController(inputController),
 	m_View(consoleView),
-	m_LastOutcome(GAME_OUTCOME::NONE)
+	m_LastOutcome(GAME_OUTCOME::NONE),
+	m_SelectedMenuItemIndex(0),
+	m_MenuItemSelected(false)
 {
 	m_Model.LoadBanner(L"TreasureHuntBanner.txt");
+	m_InputController.ButtonPressedEvent.Subscribe(
+		std::bind(&MainMenuController::OnButtonPressed, this, std::placeholders::_1)
+	);
 }
 
 bool MainMenuController::Run() {
 
-	uint8_t selectedMenuItem = 0;
+	m_MenuItemSelected = false;
+	m_SelectedMenuItemIndex = 0;
 
-	while (true) {
+	while (!m_MenuItemSelected) {
 
 		m_InputController.GetInput();
-		auto buttonsPressed = m_InputController.ButtonsPressed();
-
-		if (buttonsPressed & UP) --selectedMenuItem; // TODO
-		else if (buttonsPressed & DOWN) ++selectedMenuItem; // TODO
-		else if (buttonsPressed & SELECT) {
-			break;
-		}
-
-		Display(selectedMenuItem);
+		
+		Display();
 	}
 
 	auto menuItems = m_Model.GetMenuItems();
 
-	return menuItems[selectedMenuItem % menuItems.size()].second;
+	return menuItems[m_SelectedMenuItemIndex % menuItems.size()].second;
 }
 
 void MainMenuController::SetLastOutCome(GAME_OUTCOME lastOutcome) {
@@ -41,7 +40,7 @@ void MainMenuController::SetLastOutCome(GAME_OUTCOME lastOutcome) {
 	m_LastOutcome = lastOutcome;
 }
 
-void MainMenuController::Display(const uint8_t selectedMenuItem) {
+void MainMenuController::Display() {
 
 	std::vector<DrawRect> screenElements;
 	auto menuItems = m_Model.GetMenuItems();
@@ -79,7 +78,7 @@ void MainMenuController::Display(const uint8_t selectedMenuItem) {
 	for (size_t i = 0; i < menuItems.size(); ++i) {
 		std::wstring menuItem = menuItems[i].first;
 
-		if (selectedMenuItem % menuItems.size() == i) {
+		if (m_SelectedMenuItemIndex % menuItems.size() == i) {
 			menuItem = L"# " + menuItem;
 		}
 
@@ -93,6 +92,19 @@ void MainMenuController::Display(const uint8_t selectedMenuItem) {
 	}
 
 	m_View.DrawFrame(screenElements);
+}
 
+void MainMenuController::OnButtonPressed(BUTTON btn) {
+	switch (btn) {
+	case BUTTON::UP:
+		--m_SelectedMenuItemIndex;
+		break;
+	case BUTTON::DOWN:
+		++m_SelectedMenuItemIndex;
+		break;
+	case BUTTON::SELECT:
+		m_MenuItemSelected = true;
+		break;
+	}
 }
 

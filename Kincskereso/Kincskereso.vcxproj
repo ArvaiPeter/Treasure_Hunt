@@ -162,6 +162,7 @@
     <ClInclude Include="GameObjectRepresentations.h" />
     <ClInclude Include="GameObjects.h" />
     <ClInclude Include="GameOutcome.h" />
+    <ClInclude Include="Button.h" />
     <ClInclude Include="InputController.h" />
     <ClInclude Include="MainMenuController.h" />
     <ClInclude Include="MainMenuModel.h" />
