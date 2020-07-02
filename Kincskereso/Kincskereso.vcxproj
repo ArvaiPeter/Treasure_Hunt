@@ -145,6 +145,7 @@
     <ClCompile Include="GameObjects.cpp" />
     <ClCompile Include="InputController.cpp" />
     <ClCompile Include="MainMenuController.cpp" />
+    <ClCompile Include="MainMenuModel.cpp" />
     <ClCompile Include="Node.cpp" />
     <ClCompile Include="Route.cpp" />
     <ClCompile Include="Solver.cpp" />
@@ -154,6 +155,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ConsoleView.h" />
+    <ClInclude Include="Constants.h" />
     <ClInclude Include="DrawRect.h" />
     <ClInclude Include="GameObjectFactory.h" />
     <ClInclude Include="GameObjectModifiers.h" />
@@ -162,6 +164,7 @@
     <ClInclude Include="GameOutcome.h" />
     <ClInclude Include="InputController.h" />
     <ClInclude Include="MainMenuController.h" />
+    <ClInclude Include="MainMenuModel.h" />
     <ClInclude Include="Node.h" />
     <ClInclude Include="Route.h" />
     <ClInclude Include="Solver.h" />

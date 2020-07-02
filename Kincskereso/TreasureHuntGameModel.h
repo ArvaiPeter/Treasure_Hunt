@@ -11,6 +11,7 @@ class TreasureHuntGameModel
 public:
 	TreasureHuntGameModel();
 
+	void ResetModel(const std::wstring& lvlName = L"");
 	void LoadLevel(const std::wstring& lvlName);
 
 	const std::vector< std::shared_ptr<GameObject> >& GetLevel() const;
@@ -23,9 +24,6 @@ private:
 	std::vector< std::shared_ptr<GameObject> > m_Level;
 
 	std::shared_ptr<GameObject> m_Player;
-
-	// TODO: experimantal path or custom path handling
-	const std::wstring m_AssetFolderPath = L"..\\Assets";
 
 	const GameObjectFactory& m_GameObjectFactory;
 	

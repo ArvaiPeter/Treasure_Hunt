@@ -2,18 +2,29 @@
 
 #include <memory>
 
+#include "Constants.h"
+
 TreasureHuntGameModel::TreasureHuntGameModel()
 	: m_GameObjectFactory(GameObjectFactory::GetInstance()),
 	m_lvlWidth(0),
 	m_lvlHeight(0)
 {}
 
+void TreasureHuntGameModel::ResetModel(const std::wstring& lvlName /*=L""*/) {
+	std::wstring lvlFileName = lvlName.empty() ? m_LevelName : lvlName;
+
+	m_Level.clear();
+	m_Player.reset();
+
+	LoadLevel(lvlFileName);
+}
+
 void TreasureHuntGameModel::LoadLevel(const std::wstring& lvlName) {
 	// TODO: error handling
 
 	m_LevelName = lvlName;
 	//finding file
-	const std::wstring fullLvlPath = m_AssetFolderPath + L"\\" + m_LevelName;
+	const std::wstring fullLvlPath = AssetFolderPath + L"\\Levels\\" + m_LevelName;
 
 	//reading file and populating m_Level;
 	std::ifstream lvlFile(fullLvlPath.c_str(), std::ifstream::in);
@@ -42,6 +53,8 @@ void TreasureHuntGameModel::LoadLevel(const std::wstring& lvlName) {
 		++y;
 	}
 	m_lvlHeight = y;
+
+	lvlFile.close();
 }
 
 const std::vector< std::shared_ptr<GameObject> >& TreasureHuntGameModel::GetLevel() const {

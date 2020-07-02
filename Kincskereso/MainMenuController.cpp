@@ -1,11 +1,14 @@
 #include "MainMenuController.h"
 
+#include "Constants.h"
 
 MainMenuController::MainMenuController(InputController& inputController, ConsoleView& consoleView)
 	: m_InputController(inputController),
 	m_View(consoleView),
 	m_LastOutcome(GAME_OUTCOME::NONE)
-{}
+{
+	m_Model.LoadBanner(L"TreasureHuntBanner.txt");
+}
 
 bool MainMenuController::Run() {
 
@@ -25,38 +28,64 @@ bool MainMenuController::Run() {
 		Display(selectedMenuItem);
 	}
 
-	return m_MenuItems[selectedMenuItem % m_MenuItems.size()].second;
+	auto menuItems = m_Model.GetMenuItems();
+
+	return menuItems[selectedMenuItem % menuItems.size()].second;
 }
 
 void MainMenuController::SetLastOutCome(GAME_OUTCOME lastOutcome) {
-	// TODO
+	if (lastOutcome != GAME_OUTCOME::NONE) {
+		m_Model.LoadBanner(L"GameOverBanner.txt");
+	}
+
+	m_LastOutcome = lastOutcome;
 }
 
 void MainMenuController::Display(const uint8_t selectedMenuItem) {
 
 	std::vector<DrawRect> screenElements;
-	const int bannerWidth = 88;
-	const int bannerHeight = 7;
-	std::wstring banner = L"#######                                                     #     #                     ";
-	banner +=			  L"   #    #####  ######   ##    ####  #    # #####  ######    #     # #    # #    # ##### ";
-	banner +=			  L"   #    #    # #       #  #  #      #    # #    # #         #     # #    # ##   #   #   ";
-	banner +=			  L"   #    #    # #####  #    #  ####  #    # #    # #####     ####### #    # # #  #   #   ";
-	banner +=			  L"   #    #####  #      ######      # #    # #####  #         #     # #    # #  # #   #   ";
-	banner +=			  L"   #    #   #  #      #    # #    # #    # #   #  #         #     # #    # #   ##   #   ";
-	banner +=			  L"   #    #    # ###### #    #  ####   ####  #    # ######    #     #  ####  #    #   #   ";
+	auto menuItems = m_Model.GetMenuItems();
 
-	screenElements.emplace_back(0, 0, bannerWidth, bannerHeight, banner);
+	auto bannerDimensions = m_Model.GetBannerDimensions();
+	screenElements.emplace_back(0, 0, bannerDimensions.first, bannerDimensions.second, m_Model.GetBanner());
 
-	for (size_t i = 0; i < m_MenuItems.size(); ++i) {
-		std::wstring menuItem = m_MenuItems[i].first;
+	if (m_LastOutcome != GAME_OUTCOME::NONE) {
 
-		if (selectedMenuItem % m_MenuItems.size() == i) {
+		std::wstring gameOverMessage;
+		switch (m_LastOutcome)
+		{
+		case GAME_OUTCOME::WON:
+			gameOverMessage = L"Congratulations, You Won!";
+			break;
+		case GAME_OUTCOME::SURRENDER:
+			gameOverMessage = L"You Escaped Without The Treasure";
+			break;
+		case GAME_OUTCOME::DEATH:
+			gameOverMessage = L"You Died";
+			break;
+		default:
+			break;
+		}
+
+		screenElements.emplace_back(
+			(bannerDimensions.first / 2) - (gameOverMessage.length() / 2),
+			bannerDimensions.second + 1,
+			gameOverMessage.length(),
+			1,
+			gameOverMessage
+		);
+	}
+
+	for (size_t i = 0; i < menuItems.size(); ++i) {
+		std::wstring menuItem = menuItems[i].first;
+
+		if (selectedMenuItem % menuItems.size() == i) {
 			menuItem = L"# " + menuItem;
 		}
 
 		screenElements.emplace_back(
-			(bannerWidth / 2) - (menuItem.length() / 2),
-			bannerHeight + (i + 1),
+			(bannerDimensions.first / 2) - (menuItem.length() / 2),
+			bannerDimensions.second + (i + MenuYOffset),
 			menuItem.length(),
 			1,
 			menuItem
@@ -67,7 +96,3 @@ void MainMenuController::Display(const uint8_t selectedMenuItem) {
 
 }
 
-std::vector< std::pair<std::wstring, bool> > MainMenuController::m_MenuItems = {
-	{ L"START", true},
-	{ L"EXIT", false}
-};

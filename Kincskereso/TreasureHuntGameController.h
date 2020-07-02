@@ -4,13 +4,17 @@
 #include "TreasureHuntGameModel.h"
 #include "InputController.h"
 #include "Solver.h"
+#include "GameOutcome.h"
 
 class TreasureHuntGameController
 {
 public:
 	TreasureHuntGameController(InputController& inputController, ConsoleView& consoleView);
 
-	void Run();
+	void ResetGame();
+
+	GAME_OUTCOME Run();
+
 
 private:
 	void DrawFrame();

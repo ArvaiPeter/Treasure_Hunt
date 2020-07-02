@@ -22,7 +22,9 @@ int main() {
 		if (!play) {
 			break;
 		}
-		game.Run();
+		auto outcome = game.Run();
+		menu.SetLastOutCome(outcome);
+		game.ResetGame();
 	}
 
 	return 0; 

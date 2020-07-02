@@ -19,8 +19,14 @@ TreasureHuntGameController::TreasureHuntGameController(InputController& inputCon
 	m_Solver = std::make_unique<MissionControll>(m_Model);
 }
 
-void TreasureHuntGameController::Run() {
+void TreasureHuntGameController::ResetGame() {
+	m_UserHasControll = true;
+	m_GameHasEnded = false;
+	m_Model.ResetModel(); 
+	m_Solver = std::make_unique<MissionControll>(m_Model);
+}
 
+GAME_OUTCOME TreasureHuntGameController::Run() {
 	bool solved = false;
 
 	while (!m_GameHasEnded) {
@@ -69,6 +75,16 @@ void TreasureHuntGameController::Run() {
 
 		// DISPLAY =================================
 		DrawFrame();
+	}
+
+	if (!m_Model.GetPlayer()->IsAlive()) {
+		return GAME_OUTCOME::DEATH;
+	}
+	else if (m_Model.GetPlayer()->HasTreasure()) {
+		return GAME_OUTCOME::WON;
+	}
+	else {
+		return GAME_OUTCOME::SURRENDER;
 	}
 }
 

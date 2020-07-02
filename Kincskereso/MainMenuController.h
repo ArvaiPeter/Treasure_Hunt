@@ -3,6 +3,7 @@
 #include "InputController.h"
 #include "ConsoleView.h"
 #include "GameOutcome.h"
+#include "MainMenuModel.h"
 
 class MainMenuController
 {
@@ -18,8 +19,7 @@ private:
 private:
 	InputController& m_InputController;
 	ConsoleView& m_View;
+	MainMenuModel m_Model;
 	GAME_OUTCOME m_LastOutcome;
-
-	static std::vector< std::pair<std::wstring, bool> > m_MenuItems;
 };
 
