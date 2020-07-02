@@ -385,7 +385,7 @@ PathInfo MissionControll::GetPathInfo(std::list<Node*> path) const {
 const Node* MissionControll::GetNextStep() {
 	if (++m_NextStep == m_CurrentPath->end()) {
 		if (++m_CurrentPath != m_FoundPaths.end()) {
-			m_NextStep = m_CurrentPath->begin();
+			m_NextStep = ++m_CurrentPath->begin(); // ++ skips the first step of every path, because its the same as where the player currently stands
 		}
 		else {
 			return nullptr;
