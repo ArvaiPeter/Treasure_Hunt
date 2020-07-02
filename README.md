@@ -1,3 +1,3 @@
-Player Controlls: WASD
-Toggle AI Solver: F
+Player Controlls: WASD,
+Toggle AI Solver: F,
 Manu Select: Enter
