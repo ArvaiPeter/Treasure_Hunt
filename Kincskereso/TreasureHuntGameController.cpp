@@ -3,6 +3,7 @@
 
 #include "TreasureHuntGameController.h"
 #include "DrawRect.h"
+#include "Constants.h"
 
 
 
@@ -31,33 +32,44 @@ void TreasureHuntGameController::ResetGame() {
 GAME_OUTCOME TreasureHuntGameController::Run() {
 	bool solved = false;
 
+	std::chrono::time_point<std::chrono::high_resolution_clock> frameStartTimePoint = std::chrono::high_resolution_clock::now();
+	std::chrono::time_point<std::chrono::high_resolution_clock> frameEndTimePoint;
+
 	while (!m_GameHasEnded) {
-		// TIMING  =================================
-		// TODO: rework
-		if (!m_UserHasControll) {
-			std::this_thread::sleep_for(std::chrono::milliseconds(300));
-		}		
 
 		// INPUT  =================================
 		m_InputController.GetInput();
 
-		// LOGIC   =================================
-
-		// maybe move to separate thread with timing
+		
 		if (!m_UserHasControll) {
-			auto player = m_Model.GetPlayer();
-			int dx = 0;
-			int dy = 0;
+			// TIMING  =================================
+			frameEndTimePoint = std::chrono::high_resolution_clock::now();
 
-			auto nextStep = m_Solver->GetNextStep();
-			dx = nextStep->X() - player->X();
-			dy = nextStep->Y() - player->Y();
+			auto start = std::chrono::time_point_cast<std::chrono::microseconds>(frameStartTimePoint).time_since_epoch().count();
+			auto end = std::chrono::time_point_cast<std::chrono::microseconds>(frameEndTimePoint).time_since_epoch().count();
+			auto deltaTime = end - start;
 
-			MovePlayer(dx, dy);
+			// non-blocking "frame rate" timer ( sort of like a virtual frame rate, because only the player movement is limited not the actual time between 2 frames)
+			// this eliminates weird turnong on/off of the solver that was present with std::this_thread::sleep()
+			if (deltaTime >= (1000000 / FrameRate)) // 1,000,000 => microseconds in a second
+			{
+				auto player = m_Model.GetPlayer();
+				int dx = 0;
+				int dy = 0;
+
+				auto nextStep = m_Solver->GetNextStep();
+				dx = nextStep->X() - player->X();
+				dy = nextStep->Y() - player->Y();
+
+				MovePlayer(dx, dy);
+
+				frameStartTimePoint = std::chrono::high_resolution_clock::now();
+			}
 		}
 
 		// DISPLAY =================================
 		DrawFrame();
+		// start timer
 	}
 
 	if (!m_Model.GetPlayer()->IsAlive()) {
@@ -140,9 +152,7 @@ void TreasureHuntGameController::MovePlayer(
 		if (beast->IsAlive()) {
 			beast->Interact(player.get());
 
-			if (player->GetHealth() == 0) {
-				m_GameHasEnded = true;
-			}
+			m_GameHasEnded = player->GetHealth() == 0;
 		}
 		player->Move(dX, dY);
 	}
