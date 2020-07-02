@@ -53,6 +53,12 @@ private:
 
 	PlayerModifier* GetPlayerMod(Route& route);
 
+	// creates all initial route cases -> win, surrender
+	std::vector<Route> CreateInitialRoutes();
+
+	// finds a route to the nearest enemy
+	Route FindNearestEnemy();
+
 private:
 	const TreasureHuntGameModel& m_Level;
 	std::vector< std::shared_ptr<Node> > m_Nodes;

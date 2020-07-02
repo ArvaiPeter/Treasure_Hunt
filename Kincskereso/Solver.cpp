@@ -32,8 +32,8 @@ MissionControll::MissionControll(const TreasureHuntGameModel& lvl)
 	// connecting neighbouring nodes
 	auto lvlDimensions = m_Level.GetLevelDimensions();
 
-	for (auto y = 0; y < lvlDimensions.second; ++y) {
-		for (auto x = 0; x < lvlDimensions.first; ++x) {
+	for (unsigned int y = 0; y < lvlDimensions.second; ++y) {
+		for (unsigned int x = 0; x < lvlDimensions.first; ++x) {
 
 			auto currIndex = ConvertCoordinates(x, y, lvlDimensions.first);
 
@@ -272,35 +272,9 @@ std::vector<Route> MissionControll::FindRoutes(Route& currRoute) {
 }
 
 bool MissionControll::SolveLevel() {
-
-	//initial route: players position -> treasure -> exit
-	//additional waypoints will be added in FindRoutes() if neccessary
-	Route initialRoute;
-
-	auto player = m_Level.GetPlayer();
-	Node* playerNode = m_Nodes[ConvertCoordinates(player->X(), player->Y(), m_Level.GetLevelDimensions().first)].get();
-
-	auto exit = std::find_if(m_Nodes.begin(), m_Nodes.end(), [](std::shared_ptr<Node> node) 
-		{
-			if (auto env = dynamic_cast<Environment*>(node->FieldGameObject)) {
-				return env->GetEnvType() == EnvironmentType::EXIT;
-			}
-			return false;
-		});
-
-	auto treasure = std::find_if(m_Nodes.begin(), m_Nodes.end(), [](std::shared_ptr<Node> node)
-		{
-			if (auto consumable = dynamic_cast<Consumable*>(node->FieldGameObject)) {
-				return consumable->GetType() == ConsumableType::TREASURE;
-			}
-			return false;
-		});
-	
-	initialRoute.wayPoints.push_front((*exit).get());
-	initialRoute.wayPoints.push_front((*treasure).get());
-	initialRoute.wayPoints.push_front(playerNode);
-
 	//iterative "version" of backtracking using a queue
+	for (auto initialRoute : CreateInitialRoutes())
+		{
 	std::queue<Route> routesToExplore;
 	routesToExplore.push(initialRoute);
 
@@ -319,6 +293,14 @@ bool MissionControll::SolveLevel() {
 			routesToExplore.push(newRoute);
 		}
 	}
+	}
+
+	// by now there is no way to win or surrender
+	Route nearestEnemy = FindNearestEnemy();
+
+	m_FoundPaths = nearestEnemy.paths;
+	m_CurrentPath = m_FoundPaths.begin();
+	m_NextStep = m_CurrentPath->begin();
 
 	return false;
 }
@@ -405,7 +387,7 @@ float MissionControll::Distance(const Node* a, const Node* b) {
 }
 
 void MissionControll::ResetNodes() {
-	for (auto i = 0; i < m_Nodes.size(); ++i) {
+	for (size_t i = 0; i < m_Nodes.size(); ++i) {
 		m_Nodes[i]->ResetNode();
 	}
 }
@@ -490,6 +472,70 @@ PlayerModifier* MissionControll::GetPlayerMod(Route& route) {
 	else {
 		return dynamic_cast<PlayerModifier*>(playerModIt->get());
 	}
+}
+
+std::vector<Route> MissionControll::CreateInitialRoutes() {
+	std::vector<Route> initialRoutes;
+
+	auto player = m_Level.GetPlayer();
+	Node* playerNode = m_Nodes[ConvertCoordinates(player->X(), player->Y(), m_Level.GetLevelDimensions().first)].get();
+
+	auto exit = std::find_if(m_Nodes.begin(), m_Nodes.end(), [](std::shared_ptr<Node> node)
+		{
+			if (auto env = dynamic_cast<Environment*>(node->FieldGameObject)) {
+				return env->GetEnvType() == EnvironmentType::EXIT;
+			}
+			return false;
+		});
+
+	auto treasure = std::find_if(m_Nodes.begin(), m_Nodes.end(), [](std::shared_ptr<Node> node)
+		{
+			if (auto consumable = dynamic_cast<Consumable*>(node->FieldGameObject)) {
+				return consumable->GetType() == ConsumableType::TREASURE;
+			}
+			return false;
+		});
+
+	// GO-FOR-THE-BREAD aka TREASURE route
+	Route treasureRoute;
+	treasureRoute.wayPoints.push_front(exit->get());
+	treasureRoute.wayPoints.push_front(treasure->get());
+	treasureRoute.wayPoints.push_front(playerNode);
+
+	initialRoutes.push_back(treasureRoute);
+
+	// SURRENDER route
+	Route surrenderRoute;
+	surrenderRoute.wayPoints.push_front(exit->get());
+	surrenderRoute.wayPoints.push_front(playerNode);
+	initialRoutes.push_back(surrenderRoute);
+
+	return initialRoutes;
+}
+
+Route MissionControll::FindNearestEnemy() {
+	auto player = m_Level.GetPlayer();
+	Node* playerNode = m_Nodes[ConvertCoordinates(player->X(), player->Y(), m_Level.GetLevelDimensions().first)].get();
+
+	std::vector<std::list<Node*>> aliveEnemyPaths;
+	for (auto node : m_Nodes) {
+		if (auto beast = dynamic_cast<Beast*>(node->FieldGameObject)) {
+			std::list<Node*> pathToBeast;
+			if (FindPath(playerNode, node.get(), pathToBeast)) {
+				aliveEnemyPaths.push_back(pathToBeast);
+			}
+		}
+	}
+
+	std::sort(aliveEnemyPaths.begin(), aliveEnemyPaths.end(), [](const std::list<Node*>& a, const std::list<Node*>& b)
+		{
+			return a.size() < b.size();
+		}
+	);
+
+	Route gaveUpRoute;
+	gaveUpRoute.AddPath(aliveEnemyPaths.front());
+	return gaveUpRoute;
 }
 
 int ConvertCoordinates(const unsigned int& x, const unsigned int& y, const unsigned int& width) {
